@@ -12,14 +12,14 @@ if (!array_key_exists($_POST['token'] ?? 'guest', HTTP_API_TOKENS)) {
 	exit;
 }
 
-if (!isset($_POST['url']))
-	exit('No url');
-
 if (!isset($_POST['code']))
 	exit('No code');
 
+if (!isset($_POST['url']))
+	exit('No url');
+
 $db = new MyDB();
-$error = $db->insert($url, $code, 777000);
+$error = $db->insert($code, $url, 777000);
 
 if ($error[0] === '00000')
 	echo json_encode([

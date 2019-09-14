@@ -9,8 +9,8 @@ $db = new MyDB();
 switch ($argv[1] ?? '') {
 case 'build':
 	$sql = 'CREATE TABLE main (' .
-		'url TEXT NOT NULL, ' .
 		'code TEXT NOT NULL UNIQUE, ' .
+		'url TEXT NOT NULL, ' .
 		'author INTEGER NOT NULL, ' .
 		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
 		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
@@ -111,8 +111,8 @@ if (!preg_match('#^(?P<url>https?://[^\n\s@%]+\.[^\n\s@%]+(?:/[^\n\s]*)?)(?:[\n\
 		]);
 	exit;
 }
-$url = $matches['url'];
 $code = $matches['code'] ?? '';
+$url = $matches['url'];
 $author = $TG->FromID;
 
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -159,7 +159,7 @@ if (strpos($url, "fbclid=")) {
 
 
 /* Create Record */
-$error = $db->insert($url, $code, $author);
+$error = $db->insert($code, $url, $author);
 
 if ($error[0] === '00000')
 	$TG->sendMsg([
@@ -168,8 +168,8 @@ if ($error[0] === '00000')
 else
 	$TG->sendMsg([
 		'text' => "ERROR: Something went Wrong, please contact @S_ean\n\n" .
-		"URL: $url\n" .
 		"Code: $code\n" .
+		"URL: $url\n" .
 		"Author: $author\n\n" .
 		"PDO Error Info:\n" .
 		json_encode($error, JSON_PRETTY_PRINT)
