@@ -56,6 +56,34 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 	$cmd = strtolower($matches['cmd']);
 	$args = $matches['args'] ?? '';
 	switch ($cmd) {
+	case 'my':
+		$data = $db->findByAuthor($TG->FromID);
+		if (count($data) == 0) {
+			$TG->sendMsg([
+				'parse_mode' => 'HTML',
+				'text' => $msg_help
+			]);
+			break;
+		}
+
+		$text = "You have <b>" . count($data) . "</b> shorten URLs.\n";
+		for ($i=0; $i<count($data) && strlen($text)<1000; $i++) {
+			if (mb_strlen($data[$i]['url']) > 40)
+				$url = mb_substr($data[$i]['url'], 0, 30) . '...';
+			else
+				$url = $data[$i]['url'];
+			$url = $TG->enHTML($url);
+
+			if (!($i%5))
+				$text .= "\n";
+			$text .= ($i+1) . ". https://tg.pe/{$data[$i]['code']}\n";
+			$text .= "<code>$url</code>\n\n";
+		}
+		$TG->sendMsg([
+			'text' => $text,
+			'parse_mode' => 'HTML'
+		]);
+		break;
 	case 'start':
 	case 'help':
 	default:

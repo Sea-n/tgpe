@@ -34,6 +34,21 @@ class MyDB {
 		return $stmt->fetch();
 	}
 
+	/* Return data array, or empty array */
+	public function findByAuthor(int $author) {
+		$sql = "SELECT * FROM main WHERE author = :author";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':author' => $author
+		]);
+
+		$result = [];
+		while ($data = $stmt->fetch())
+			$result[] = $data;
+
+		return $result;
+	}
+
 	/* Find unused code */
 	public function allocateCode(): string {
 		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
