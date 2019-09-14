@@ -12,18 +12,42 @@ $db = new MyDB();
 $msg_help = <<<EOF
 Hello, just send me URL.
 
-You can also specific your short code (>= 3 char)
+You can also specific your short code.
 
 <b>Usage</b>
 For instance, send me following text:
 <pre>https://t.me/tgpebot bot</pre>
 
+Note: You can use <b>a-z</b>, <b>A-Z</b> and <b>0-9</b>.
+Minimum length is <b>3</b> characters.
+
+
 <b>Commands</b>
-/my Show all your links
+/my - Show all your links.
+/help - Show this message.
 
 <b>About</b>
 Developer: @SeanChannel
 Source Code: tg.pe/repo
+EOF;
+
+if (strpos($TG->data['message']['from']['language_code'], 'zh') !== false)
+	$msg_help = <<<EOF
+安安，請直接傳網址給我
+
+<b>【使用方式】</b>
+如果要自訂短網址，可參考以下範例：
+<pre>https://t.me/tgpebot bot</pre>
+
+注意：目前僅接受英數字（A-Z, a-z, 0-9）組合、最短 3 個字
+
+<b>【指令列表】</b>
+/my - 顯示您建立的連結清單
+/help - 顯示此訊息
+
+<b>【關於】</b>
+開發者： @SeanChannel
+原始碼： tg.pe/repo
 EOF;
 
 
@@ -149,7 +173,23 @@ if (strlen($code) >= 3) { /* Check Code Existance */
 if (strpos($url, "fbclid=")) {
 	$TG->sendMsg([
 		'parse_mode' => 'HTML',
-		'text' => 'Hey! Please remove <b>fbclid</b> before sharing URLs.'
+		'text' => "Hey! Please remove <b>fbclid</b> before sharing URLs.\n\n" .
+		"fbclid is used for Facebook interaction tracking against user privacy.\n\n" .
+		"You can install this <a href='https://addons.mozilla.org/en-US/firefox/addon/facebook-tracking-removal/'>add-on</a> to <b>auto remove</b> Facebook tracking ID.",
+		'reply_markup' => [
+			'inline_keyboard' => [
+				[
+					[
+						'text' => 'Firefox',
+						'url' => 'https://addons.mozilla.org/en-US/firefox/addon/facebook-tracking-removal/'
+					],
+					[
+						'text' => 'Chrome',
+						'url' => 'https://chrome.google.com/webstore/detail/tracking-ad-removal-for-f/ldeofbdmhnnocclkaddcnamhbhanaiaj'
+					]
+				]
+			]
+		]
 	]);
 	exit;
 }
