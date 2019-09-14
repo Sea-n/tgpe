@@ -61,4 +61,17 @@ class MyDB {
 				return $code;
 		}
 	}
+
+	/* Return error info or ['00000', null, null] on success */
+	public function insert(string $url, string $code, int $author) {
+		$sql = "INSERT INTO main(url, code, author) VALUES (:url, :code, :author)";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':url' => $url,
+			':code' => $code,
+			':author' => $author
+		]);
+
+		return $stmt->errorInfo();
+	}
 }

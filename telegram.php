@@ -159,15 +159,9 @@ if (strpos($url, "fbclid=")) {
 
 
 /* Create Record */
-$sql = "INSERT INTO main(url, code, author) VALUES (:url, :code, :author)";
-$stmt = $db->pdo->prepare($sql);
-$r = $stmt->execute([
-	':url' => $url,
-	':code' => $code,
-	':author' => $author
-]);
+$error = $db->insert($url, $code, $author);
 
-if ($stmt->errorCode() === '00000')
+if ($error[0] === '00000')
 	$TG->sendMsg([
 		'text' => "Success!\n\nhttps://tg.pe/$code"
 	]);
@@ -178,5 +172,5 @@ else
 		"Code: $code\n" .
 		"Author: $author\n\n" .
 		"PDO Error Info:\n" .
-		json_encode($stmt->errorInfo(), JSON_PRETTY_PRINT)
+		json_encode($error, JSON_PRETTY_PRINT)
 	]);
