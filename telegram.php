@@ -1,32 +1,11 @@
 <?php
 /* This file hard-linked from sean.taipei/telegram/tgpe.php to tg.pe/telegram.php */
+if (!isset($TG))
+	exit;
 
 require('/usr/share/nginx/tg.pe/config.php');
 require('/usr/share/nginx/tg.pe/database.php');
 $db = new MyDB();
-
-/* Command-line Execuate */
-switch ($argv[1] ?? '') {
-case 'build':
-	$sql = 'CREATE TABLE main (' .
-		'code TEXT NOT NULL UNIQUE, ' .
-		'url TEXT NOT NULL, ' .
-		'author TEXT NOT NULL, ' .
-		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
-		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
-	$stmt = $db->pdo->prepare($sql);
-	$stmt->execute();
-	exit;
-case 'dump':
-	$sql = "SELECT * FROM main";
-	$stmt = $db->pdo->prepare($sql);
-	$stmt->execute();
-	while ($data = $stmt->fetch())
-		printf("%-5s %-30s %10s  %s\n", $data['code'], $data['url'], $data['author'], $data['created_at']);
-	exit;
-}
-if (!isset($TG))
-	exit;
 
 
 /* Message Texts */
