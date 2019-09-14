@@ -135,7 +135,7 @@ if (strlen($code) >= 3) { /* Check Code Existance */
 		]);
 		exit;
 	} else
-		$code = $db->allocateCode($url);
+		$code = $db->allocateCode();
 } else { /* 1 or 2 char only allow admins */
 	if (!in_array($TG->FromID, TG_ADMINS)) {
 		$TG->sendMsg([

@@ -51,6 +51,9 @@ class MyDB {
 
 	/* Find unused code */
 	public function allocateCode(string $prefix = '', $minLen = 3): string {
+		if (!preg_match('#^[A-Za-z0-9_-]$#', $prefix))
+			return false; // illegal prefix
+
 		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 		for ($len=$minLen; $len<=32; $len++) // Try length from min to 32
@@ -66,6 +69,12 @@ class MyDB {
 
 	/* Return error info or ['00000', null, null] on success */
 	public function insert(string $code, string $url, string $author) {
+		if (!preg_match('#^[A-Za-z0-9_-]$#', $code))
+			return ['SEAN', 0, 'illegal code'];
+
+		if (!filter_var($url, FILTER_VALIDATE_URL))
+			return ['SEAN', 0, 'illegal url'];
+
 		$sql = "INSERT INTO main(code, url, author) VALUES (:code, :url, :author)";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
