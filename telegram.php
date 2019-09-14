@@ -132,13 +132,6 @@ $domain = $matches['domain'];
 $code = $matches['code'] ?? '';
 $author = "TG{$TG->FromID}";
 
-if (strtolower(substr($domain, -5)) == 'tg.pe') {
-	$TG->sendMsg([
-		'text' => 'This URL is short enough.'
-	]);
-	exit;
-}
-
 if (idn_to_ascii($domain) !== $domain) {
 	$domain = idn_to_ascii($domain);
 	$path = $matches['path'] ?? '/';
@@ -148,6 +141,13 @@ if (idn_to_ascii($domain) !== $domain) {
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
 	$TG->sendMsg([
 		'text' => 'Please Send a Vaild URL.'
+	]);
+	exit;
+}
+
+if (strtolower(substr($domain, -5)) == 'tg.pe') {
+	$TG->sendMsg([
+		'text' => 'This URL is short enough.'
 	]);
 	exit;
 }

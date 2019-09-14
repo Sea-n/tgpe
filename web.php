@@ -80,7 +80,7 @@ if (isset($_POST['url'])) {
 		echo "<p style='color: red;'>ERROR: {$error[0]}</p>";
 ?>
 		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
-		Use Telegram Bot to unlimited access.</small>
+		Use Telegram Bot to get unlimited access for free.</small>
 	</div>
 	<br>
 
