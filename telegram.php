@@ -117,7 +117,7 @@ if (strpos($text, '.') !== false // Looks like URL
 	$text = "https://$text"; // Prepend HTTPS scheme
 
 /* Vaildate URL */
-if (!preg_match('#^(?P<url>https?://(?P<domain>[^\n\s@%/]+\.[^\n\s@%/]+)(?:/[^\n\s]*)?)(?:[\n\s]+(?P<code>[a-zA-Z0-9]+))?$#i', $text, $matches)) {
+if (!preg_match('#^(?P<url>(?P<scheme>https?)://(?P<domain>[^\n\s@%/]+\.[^\n\s@%/]+)(?<path>/[^\n\s]*)?)(?:[\n\s]+(?P<code>[a-zA-Z0-9]+))?$#iu', $text, $matches)) {
 	if ($TG->ChatID > 0) # Private Message
 		$TG->sendMsg([
 			'parse_mode' => 'HTML',
@@ -126,16 +126,24 @@ if (!preg_match('#^(?P<url>https?://(?P<domain>[^\n\s@%/]+\.[^\n\s@%/]+)(?:/[^\n
 	exit;
 }
 
-if (strtolower(substr($matches['domain'], -5)) == 'tg.pe') {
+$scheme = $matches['scheme'];
+$url = $matches['url'];
+$domain = $matches['domain'];
+$code = $matches['code'] ?? '';
+$author = "TG{$TG->FromID}";
+
+if (strtolower(substr($domain, -5)) == 'tg.pe') {
 	$TG->sendMsg([
 		'text' => 'This URL is short enough.'
 	]);
 	exit;
 }
 
-$code = $matches['code'] ?? '';
-$url = $matches['url'];
-$author = "TG{$TG->FromID}";
+if (idn_to_ascii($domain) !== $domain) {
+	$domain = idn_to_ascii($domain);
+	$path = $matches['path'] ?? '/';
+	$url = "$scheme://$domain$path";
+}
 
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
 	$TG->sendMsg([
