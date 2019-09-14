@@ -69,7 +69,7 @@ class MyDB {
 
 	/* Return error info or ['00000', null, null] on success */
 	public function insert(string $code, string $url, string $author) {
-		if (!preg_match('#^[A-Za-z0-9_-]$#', $code))
+		if (!preg_match('#^[A-Za-z0-9_-]+$#', $code))
 			return ['SEAN', 0, 'illegal code'];
 
 		if (!filter_var($url, FILTER_VALIDATE_URL))
