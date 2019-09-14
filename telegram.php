@@ -11,7 +11,7 @@ case 'build':
 	$sql = 'CREATE TABLE main (' .
 		'code TEXT NOT NULL UNIQUE, ' .
 		'url TEXT NOT NULL, ' .
-		'author INTEGER NOT NULL, ' .
+		'author TEXT NOT NULL, ' .
 		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
 		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
 	$stmt = $db->pdo->prepare($sql);
@@ -58,7 +58,7 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 	$args = $matches['args'] ?? '';
 	switch ($cmd) {
 	case 'my':
-		$data = $db->findByAuthor($TG->FromID);
+		$data = $db->findByAuthor("TG{$TG->FromID}");
 		if (count($data) == 0) {
 			$TG->sendMsg([
 				'parse_mode' => 'HTML',
@@ -113,7 +113,7 @@ if (!preg_match('#^(?P<url>https?://[^\n\s@%]+\.[^\n\s@%]+(?:/[^\n\s]*)?)(?:[\n\
 }
 $code = $matches['code'] ?? '';
 $url = $matches['url'];
-$author = $TG->FromID;
+$author = "TG{$TG->FromID}";
 
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
 	$TG->sendMsg([

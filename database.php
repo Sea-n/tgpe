@@ -35,7 +35,7 @@ class MyDB {
 	}
 
 	/* Return data array, or empty array */
-	public function findByAuthor(int $author) {
+	public function findByAuthor(string $author) {
 		$sql = "SELECT * FROM main WHERE author = :author";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
@@ -63,7 +63,7 @@ class MyDB {
 	}
 
 	/* Return error info or ['00000', null, null] on success */
-	public function insert(string $code, string $url, int $author) {
+	public function insert(string $code, string $url, string $author) {
 		$sql = "INSERT INTO main(code, url, author) VALUES (:code, :url, :author)";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([

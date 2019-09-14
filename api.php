@@ -18,8 +18,10 @@ if (!isset($_POST['code']))
 if (!isset($_POST['url']))
 	exit('No url');
 
+$author = HTTP_API_TOKENS[ $_POST['token'] ?? 'guest' ];
+
 $db = new MyDB();
-$error = $db->insert($code, $url, 777000);
+$error = $db->insert($code, $url, $author);
 
 if ($error[0] === '00000')
 	echo json_encode([
