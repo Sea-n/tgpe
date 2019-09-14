@@ -1,7 +1,8 @@
 <?php
 /* This file hard-linked from sean.taipei/telegram/tgpe.php to tg.pe/telegram.php */
 
-$db = new PDO('sqlite:/usr/share/nginx/tg.pe/sqlite.db');
+require('/usr/share/nginx/tg.pe/database.php');
+$db = new MyDB();
 
 /* Command-line Execuate */
 switch ($argv[1] ?? '') {
@@ -12,12 +13,12 @@ case 'build':
 		'author INTEGER NOT NULL, ' .
 		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
 		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
-	$stmt = $db->prepare($sql);
+	$stmt = $db->pdo->prepare($sql);
 	$stmt->execute();
 	exit;
 case 'dump':
 	$sql = "SELECT * FROM main";
-	$stmt = $db->prepare($sql);
+	$stmt = $db->pdo->prepare($sql);
 	$stmt->execute();
 	while ($data = $stmt->fetch())
 		printf("%-5s %-30s %10s  %s\n", $data['code'], $data['url'], $data['author'], $data['created_at']);
@@ -94,13 +95,7 @@ if (!filter_var($url, FILTER_VALIDATE_URL)) {
 
 
 if (strlen($code) >= 3) { /* Check Code Existance */
-	$sql = "SELECT * FROM main WHERE code = :code";
-	$stmt = $db->prepare($sql);
-	$stmt->execute([
-		':code' => $code
-	]);
-
-	if ($data = $stmt->fetch()) {
+	if ($data = $db->findByCode($code)) {
 		$TG->sendMsg([
 			'text' => "Already Exist: https://tg.pe/$code\n\n" .
 			"Original URL: {$data['url']}"
@@ -108,20 +103,13 @@ if (strlen($code) >= 3) { /* Check Code Existance */
 		exit;
 	}
 } else if (strlen($code) === 0) { /* Allocate 3-char not-exists code */
-	if (!preg_match('#^[a-zA-Z0-9_-]{2,16}$#', $code)) {
-		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-		do {
-			$code = '';
-			for ($i=0; $i<3; $i++)
-				$code .= $base58[rand(0, 57)];
-
-			$sql = "SELECT * FROM main WHERE code = :code";
-			$stmt = $db->prepare($sql);
-			$stmt->execute([
-				':code' => $code
-			]);
-		} while ($stmt->fetch());
-	}
+	if ($code = $db->findCodeByUrl($url)) {
+		$TG->sendMsg([
+			'text' => "Success!\n\nhttps://tg.pe/$code"
+		]);
+		exit;
+	} else
+		$code = $db->allocateCode($url);
 } else { /* 1 or 2 char only allow admins */
 	if (!in_array($TG->FromID, [
 		218892893, # Jerry
@@ -146,7 +134,7 @@ if (strpos($url, "fbclid=")) {
 
 /* Create Record */
 $sql = "INSERT INTO main(url, code, author) VALUES (:url, :code, :author)";
-$stmt = $db->prepare($sql);
+$stmt = $db->pdo->prepare($sql);
 $r = $stmt->execute([
 	':url' => $url,
 	':code' => $code,
