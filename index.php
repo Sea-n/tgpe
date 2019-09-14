@@ -4,7 +4,7 @@ require('database.php');
 $code = substr($_SERVER['REQUEST_URI'], 1); // $_SERVER['REQUEST_URI'] = string(5) "/path"
 
 if ($code == '') { // index homepage
-	include('home.html');
+	include('web.php');
 	exit;
 }
 
