@@ -3,6 +3,8 @@ require('database.php');
 
 $code = substr($_SERVER['REQUEST_URI'], 1); // $_SERVER['REQUEST_URI'] = string(5) "/path"
 
+$code = preg_replace('#\?.*#', '', $code);
+
 if ($code == '') { // index homepage
 	include('web.php');
 	exit;

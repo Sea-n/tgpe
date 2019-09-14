@@ -24,6 +24,9 @@ if (isset($_POST['url'])) {
 	if (!filter_var($url, FILTER_VALIDATE_URL))
 		$error[] = "URL invalid.";
 
+	if (strpos($url, "fbclid="))
+		$error[] = "Please remove fbclid before sharing URLs.";
+
 	$domain = $matches['domain'] ?? 'url broken';
 	if (strtolower(substr($domain, -5)) == 'tg.pe')
 		$error[] = 'Short enough';
