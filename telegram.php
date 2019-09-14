@@ -14,8 +14,16 @@ Hello, just send me URL.
 
 You can also specific your short code (>= 3 char)
 
-For instance:
+<b>Usage</b>
+For instance, send me following text:
 <pre>https://t.me/tgpebot bot</pre>
+
+<b>Commands</b>
+/my Show all your links
+
+<b>About</b>
+Developer: @SeanChannel
+Source Code: tg.pe/repo
 EOF;
 
 
@@ -25,6 +33,7 @@ $text = $TG->data['message']['text'] ?? $TG->data['message']['photo']['caption']
 if (empty($text)) {
 	if ($TG->ChatID > 0) # Private Message
 		$TG->sendMsg([
+			'parse_mode' => 'HTML',
 			'text' => $msg_help
 		]);
 	exit;
@@ -79,17 +88,26 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 
 
 if (strpos($text, '.') !== false // Looks like URL
-	&& substr($text, 0, 4) !== 'http') // Not start with HTTP or HTTPS
+	&& strtolower(substr($text, 0, 4)) !== 'http') // Not start with HTTP or HTTPS
 	$text = "https://$text"; // Prepend HTTPS scheme
 
 /* Vaildate URL */
-if (!preg_match('#^(?P<url>https?://[^\n\s@%]+\.[^\n\s@%]+(?:/[^\n\s]*)?)(?:[\n\s]+(?P<code>[a-zA-Z0-9]+))?$#', $text, $matches)) {
+if (!preg_match('#^(?P<url>https?://(?P<domain>[^\n\s@%/]+\.[^\n\s@%/]+)(?:/[^\n\s]*)?)(?:[\n\s]+(?P<code>[a-zA-Z0-9]+))?$#i', $text, $matches)) {
 	if ($TG->ChatID > 0) # Private Message
 		$TG->sendMsg([
+			'parse_mode' => 'HTML',
 			'text' => $msg_help
 		]);
 	exit;
 }
+
+if (strtolower(substr($matches['domain'], -5)) == 'tg.pe') {
+	$TG->sendMsg([
+		'text' => 'This URL is short enough.'
+	]);
+	exit;
+}
+
 $code = $matches['code'] ?? '';
 $url = $matches['url'];
 $author = "TG{$TG->FromID}";
