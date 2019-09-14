@@ -7,20 +7,44 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 	exit;
 }
 
+
 if (!array_key_exists($_POST['token'] ?? 'guest', HTTP_API_TOKENS)) {
 	header("HTTP/2 401 Unauthorized");
 	exit;
 }
 
-if (!isset($_POST['code']))
-	exit('No code');
+$author = HTTP_API_TOKENS[ $_POST['token'] ?? 'guest' ];
+
+
+$db = new MyDB();
 
 if (!isset($_POST['url']))
 	exit('No url');
+$url = $_POST['url'];
 
-$author = HTTP_API_TOKENS[ $_POST['token'] ?? 'guest' ];
 
-$db = new MyDB();
+if (isset($_POST['code'])) {
+	$code = $_POST['code'];
+	if ($data = $db->findByCode($code)) {
+		echo json_encode([
+			'ok' => false,
+			'longUrl' => $data['url'],
+			'message' => 'Code already exists.'
+		]);
+		exit;
+	}
+} else if ($data = $db->findCodeByUrl($url)) {
+	echo json_encode([
+		'ok' => true,
+		'shortLink' => $data,
+		'message' => 'Link already exists.'
+	], JSON_PRETTY_PRINT);
+	exit;
+} else if (isset($_POST['prefix']))
+	$code = $db->allocateCode($_POST['prefix'], $_POST['len'] ?? 3);
+else
+	$code = $db->allocateCode();
+
 $error = $db->insert($code, $url, $author);
 
 if ($error[0] === '00000')
@@ -33,5 +57,5 @@ else
 		'ok' => false,
 		'errorCode1' => $error[0],
 		'errorCode2' => $error[1],
-		'errorInfo' => $error[2],
+		'message' => $error[2],
 	], JSON_PRETTY_PRINT);

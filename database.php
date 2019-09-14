@@ -50,16 +50,18 @@ class MyDB {
 	}
 
 	/* Find unused code */
-	public function allocateCode(): string {
+	public function allocateCode(string $prefix = '', $minLen = 3): string {
 		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-		for ($r=30; $r<100; $r++) { // Try length from 3 to 9, each try 10 times
-			$code = '';
-			for ($i=0; $i<($r/10); $i++)
-				$code .= $base58[rand(0, 57)];
 
-			if (!$this->findByCode($code))
-				return $code;
-		}
+		for ($len=$minLen; $len<=32; $len++) // Try length from min to 32
+			for ($_=0; $_<10; $_++) { // Try 10 times
+				$code = $prefix;
+				while (strlen($code) < $len)
+					$code .= $base58[rand(0, 57)];
+
+				if (!$this->findByCode($code))
+					return $code;
+			}
 	}
 
 	/* Return error info or ['00000', null, null] on success */
