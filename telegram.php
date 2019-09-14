@@ -1,6 +1,7 @@
 <?php
 /* This file hard-linked from sean.taipei/telegram/tgpe.php to tg.pe/telegram.php */
 
+require('/usr/share/nginx/tg.pe/config.php');
 require('/usr/share/nginx/tg.pe/database.php');
 $db = new MyDB();
 
@@ -139,10 +140,7 @@ if (strlen($code) >= 3) { /* Check Code Existance */
 	} else
 		$code = $db->allocateCode($url);
 } else { /* 1 or 2 char only allow admins */
-	if (!in_array($TG->FromID, [
-		218892893, # Jerry
-		109780439  # Sean
-	])) {
+	if (!in_array($TG->FromID, TG_ADMINS)) {
 		$TG->sendMsg([
 			'text' => "ERROR: Code should be at least 3 chars"
 		]);
