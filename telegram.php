@@ -46,7 +46,8 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 	$args = $matches['args'] ?? '';
 	switch ($cmd) {
 	case 'my':
-		$data = $db->findByAuthor("TG{$TG->FromID}");
+		$author = "TG{$TG->FromID}";
+		$data = $db->findByAuthor($author);
 		if (count($data) == 0) {
 			$TG->sendMsg([
 				'parse_mode' => 'HTML',

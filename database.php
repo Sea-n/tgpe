@@ -51,7 +51,7 @@ class MyDB {
 
 	/* Find unused code */
 	public function allocateCode(string $prefix = '', $minLen = 3): string {
-		if (!preg_match('#^[A-Za-z0-9_-]$#', $prefix))
+		if (!preg_match('#^[A-Za-z0-9_-]*$#', $prefix))
 			return false; // illegal prefix
 
 		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
