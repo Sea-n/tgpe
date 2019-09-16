@@ -70,3 +70,21 @@ input {
   color: #cbd0d5;
 }
 
+.button {
+  background-color: white;
+  border: solid #0088CC;
+  color: blask;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  -webkit-transition-duration: 0.4s;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.button:hover {
+  background-color: #0088CC;
+  color: white;
+  border-radius: 8px;
+}

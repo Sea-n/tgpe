@@ -81,7 +81,9 @@ if (isset($_POST['url'])) {
             </span>
             <br>
             <span style="color: darkgray;">Custom Short Link: https://tg.pe/<input name="code" size="4" disabled="1" placeholder="x123"><br>
-            <input type="submit" value="Shorten!"></p>
+            <button class="button" type="submit">Shorten!</button>
+            </p>
+
         </form>
 <?php }
     else if (!empty($code))
