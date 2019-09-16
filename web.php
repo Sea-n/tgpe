@@ -48,7 +48,7 @@ if (isset($_POST['url'])) {
 	<link rel="icon" type="image/png" href="/logo-128.png" sizes="128x128">
 	<link rel="icon" type="image/png" href="/logo-64.png" sizes="64x64">
 	<link rel="icon" type="image/png" href="/logo.png" sizes="680x680">
-    <link rel="stylesheet" href="style.css" />
+	<link rel="stylesheet" href="style.css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="keywords" content="url shortener, tgpe">
 	<meta name="description" content="Shortest Shortener">
@@ -65,41 +65,45 @@ if (isset($_POST['url'])) {
 </head>
 <body>
 <center>
-    <img src="logo_boderless.png" style="height: 40vh; margin-top: 40px;">
-    <h1>URL Shortener</h1>
-    <h2>Shorten Your URL: <a href="https://tg.pe/bot">tg.pe/bot</a></h2>
+<div class="content">
+	<img src="logo_boderless.png" style="height: 40vh; margin-top: 40px;">
+	<h1>URL Shortener</h1>
+	<h2>Shorten Your URL: <a href="https://tg.pe/bot">tg.pe/bot</a></h2>
 
-    <div id="gen">
-        <big>Limited Online Version</big>
+	<div id="gen">
+		<big>Limited Online Version</big>
 
 <?php if (!isset($_POST['url'])) { ?>
-        <form method="POST" action="/web">
-            <p>Your URL:<br>
-            <span class='input'>
-                <input name="url" size="30" placeholder="https://www.sean.taipei/">
-                <span></span>
-            </span>
-            <br>
-            <span style="color: darkgray;">Custom Short Link: https://tg.pe/<input name="code" size="4" disabled="1" placeholder="x123"><br>
-            <button class="button" type="submit">Shorten!</button>
-            </p>
+		<form method="POST" action="/web">
+			<p>Your URL:<br>
+			<span class='input'>
+				<input name="url" size="30" placeholder="https://www.sean.taipei/">
+				<span></span>
+			</span>
+			<br>
+			<span style="color: darkgray;">Custom Short Link: https://tg.pe/<input name="code" size="4" disabled="1" placeholder="x123"><br>
+			<button class="button" type="submit">Shorten!</button>
+			</p>
 
-        </form>
+		</form>
 <?php }
-    else if (!empty($code))
-        echo "<p>Your Link: <a href='https://tg.pe/$code' target='_blank'>https://tg.pe/$code</a></p>";
+	else if (!empty($code))
+		echo "<p>Your Link: <a href='https://tg.pe/$code' target='_blank'>https://tg.pe/$code</a></p>";
 
-    else if (count($error))
-        echo "<p style='color: red;'>ERROR: {$error[0]}</p>";
+	else if (count($error))
+		echo "<p style='color: red;'>ERROR: {$error[0]}</p>";
 ?>
-        <small>Note: Online version only allow random short link starts with <code>x</code>.<br>
-        Use Telegram Bot to get unlimited access for free.</small>
-    </div>
-    <br>
-    <footer id="footer">
-        <p>Source Code: <a href="https://github.com/Sea-n/tgpe">Sea-n/tgpe</a><br>
-        Developed by <a href="https://www.sean.taipei/">Sean</a>.</p>
-    </footer>
+		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
+		Use Telegram Bot to get unlimited access for free.</small>
+	</div>
+	<br>
+</div>
+<div class="footer">
+	<footer id="footer">
+		<p>Source Code: <a href="https://github.com/Sea-n/tgpe">Sea-n/tgpe</a><br>
+		Developed by <a href="https://www.sean.taipei/">Sean</a>.</p>
+	</footer>
+</div>
 </center>
 </body>
 </html>
