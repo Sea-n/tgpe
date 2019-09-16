@@ -65,7 +65,7 @@ if (isset($_POST['url'])) {
 </head>
 <body>
 <center>
-    <img src="logo.png" style="height: 40vh; margin-top: 40px;">
+    <img src="logo_boderless.png" style="height: 40vh; margin-top: 40px;">
     <h1>URL Shortener</h1>
     <h2>Shorten Your URL: <a href="https://tg.pe/bot">tg.pe/bot</a></h2>
 
