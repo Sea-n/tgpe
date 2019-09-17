@@ -153,7 +153,12 @@ if (strtolower(substr($domain, -5)) == 'tg.pe') {
 }
 
 
-if (strlen($code) >= 3) { /* Check Code Existance */
+if (strlen($code) > 16) { /* Check Code Length */
+	$TG->sendMsg([
+		'text' => "Code too long"
+	]);
+	exit;
+} else if (strlen($code) >= 3) { /* Check Code Existance */
 	if ($data = $db->findByCode($code)) {
 		$TG->sendMsg([
 			'text' => "Already Exist: https://tg.pe/$code\n\n" .

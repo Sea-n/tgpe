@@ -51,7 +51,7 @@ class MyDB {
 
 	/* Find unused code */
 	public function allocateCode(string $prefix = '', $minLen = 3): string {
-		if (!preg_match('#^[A-Za-z0-9_-]*$#', $prefix))
+		if (!preg_match('#^[A-Za-z0-9_-]{0,32}$#', $prefix))
 			return false; // illegal prefix
 
 		$base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -69,7 +69,7 @@ class MyDB {
 
 	/* Return error info or ['00000', null, null] on success */
 	public function insert(string $code, string $url, string $author) {
-		if (!preg_match('#^[A-Za-z0-9_-]+$#', $code))
+		if (!preg_match('#^[A-Za-z0-9_-]{1,32}$#', $code))
 			return ['SEAN', 0, 'illegal code'];
 
 		if (!filter_var($url, FILTER_VALIDATE_URL))
