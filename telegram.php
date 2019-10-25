@@ -81,21 +81,22 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 		}
 
 		$text = "You have <b>" . count($data) . "</b> shorten URLs.\n";
-		for ($i=0; $i<count($data) && strlen($text)<1000; $i++) {
+		for ($i=0; $i<count($data) && strlen($text)<4000; $i++) {
 			if (mb_strlen($data[$i]['url']) > 40)
-				$url = mb_substr($data[$i]['url'], 0, 30) . '...';
+				$url = mb_substr($data[$i]['url'], 0, 25) . '...' . mb_substr($data[$i]['url'], -5);
 			else
 				$url = $data[$i]['url'];
 			$url = $TG->enHTML($url);
 
 			if (!($i%5))
 				$text .= "\n";
-			$text .= ($i+1) . ". https://tg.pe/{$data[$i]['code']}\n";
-			$text .= "<code>$url</code>\n\n";
+			$text .= ($i+1) . ". tg.pe/{$data[$i]['code']}  ";
+			$text .= "(<code>$url</code>)\n";
 		}
 		$TG->sendMsg([
 			'text' => $text,
-			'parse_mode' => 'HTML'
+			'parse_mode' => 'HTML',
+			'disable_web_page_preview' => true
 		]);
 		break;
 	case 'start':

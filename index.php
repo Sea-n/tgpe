@@ -18,7 +18,31 @@ $db = new MyDB();
 if (!$data = $db->findByCode($code))
 	error(404, 'Code not found');
 
-header("Location: {$data['url']}");
+$url = $data['url'];
+
+if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing)#i", $_SERVER['HTTP_USER_AGENT'])) {
+	header("Location: $url");
+	exit;
+}
+
+echo <<<EOF
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="robots" content="noindex,nosnippet">
+</head>
+<body>
+	<p>Redirecting to <a id="url" href="$url">$url</a>....</p>
+	<script>
+		window.onload = function() {
+			var target = document.getElementById('url').href;
+			window.location.replace(target);
+		}
+	</script>
+</body>
+</html>
+EOF;
 
 
 function error(int $code, string $msg) {
