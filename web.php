@@ -20,7 +20,7 @@ if (isset($_POST['url'])) {
 
 	if ($_SERVER["HTTP_CF_IPCOUNTRY"] == 'TW' && count($data) >= 5) {
 		$last = strtotime(end($data)['created_at']);
-		if (time() - $last <= 12 * 60 * 60)
+		if (time() - $last <= 10 * 60)
 			$error[] = "You can only create 5 links in web version";
 	}
 
