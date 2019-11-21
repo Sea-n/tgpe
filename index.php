@@ -1,19 +1,24 @@
 <?php
 require('database.php');
 
-$code = substr($_SERVER['REQUEST_URI'], 1); // $_SERVER['REQUEST_URI'] = string(5) "/path"
+$uri = $_SERVER['REQUEST_URI']; // $_SERVER['REQUEST_URI'] = string(5) "/path?query=xx"
 
-$code = preg_replace('#\?.*#', '', $code);
+$path = preg_replace('#\?.*#', '', $uri);
 
-if ($code == '') { // index homepage
+if (preg_match("#fbclid=#", $uri)) {
+	header("Location: $path");
+	exit("Removing fbclid...");
+}
+
+if ($path == '/') { // index homepage
 	include('web.php');
 	exit;
 }
 
-if (!preg_match('#^[\w_-]+(\.[a-z]+)?$#', $code))
+if (!preg_match('#^/[\w_-]+(\.[a-z]+)?$#', $path))
 	error(400, 'Code invalid');
 
-[$code, $ext] = explode('.', $code, 2);
+[$code, $ext] = explode('.', substr($path, 1), 2);
 
 $db = new MyDB();
 
