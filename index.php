@@ -27,7 +27,7 @@ if (!$data = $db->findByCode($code))
 
 $url = $data['url'];
 
-if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing)#i", $_SERVER['HTTP_USER_AGENT'])
+if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT)#i", $_SERVER['HTTP_USER_AGENT'])
 	|| (substr($url, -strlen($ext)) == $ext && in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp']))) {
 	header("Location: $url");
 	exit;
