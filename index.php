@@ -18,7 +18,12 @@ if ($path == '/') { // index homepage
 if (!preg_match('#^/[\w_-]+(\.[a-z]+)?$#', $path))
 	error(400, 'Code invalid');
 
-[$code, $ext] = explode('.', substr($path, 1), 2);
+$path = explode('.', substr($path, 1), 2);
+$code = $path[0];
+if (isset($path[1]))
+	$ext = $path[1];
+else
+	$ext = '';
 
 $db = new MyDB();
 
@@ -27,7 +32,7 @@ if (!$data = $db->findByCode($code))
 
 $url = $data['url'];
 
-if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT)#i", $_SERVER['HTTP_USER_AGENT'])
+if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT)#i", $_SERVER['HTTP_USER_AGENT'] ?? '')
 	|| (substr($url, -strlen($ext)) == $ext && in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp']))) {
 	header("Location: $url");
 	exit;
@@ -38,7 +43,11 @@ echo <<<EOF
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="robots" content="noindex,nosnippet">
+EOF;
+if (!in_array($code, ['bot', 'dev', 'repo']))
+	echo '<meta name="robots" content="noindex,nosnippet">';
+
+echo <<<EOF
 </head>
 <body>
 	<p>Redirecting to <a id="url" href="$url">$url</a>....</p>
@@ -63,7 +72,7 @@ function error(int $code, string $msg) {
 		break;
 	}
 
-	if (strlen($_SERVER['HTTP_USER_AGENT']) < 20)
+	if (strlen($_SERVER['HTTP_USER_AGENT'] ?? '') < 20)
 		exit($msg); // Message Only for bots
 
 	echo <<<EOF

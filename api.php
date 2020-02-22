@@ -33,7 +33,7 @@ if (isset($_POST['code'])) {
 		]);
 		exit;
 	}
-} else if ($data = $db->findCodeByUrl($url)) {
+} else if ($data = $db->findCodeByUrl($url) && !isset($_POST['force'])) {
 	echo json_encode([
 		'ok' => true,
 		'shortLink' => $data,

@@ -1,2 +1,8 @@
 User-agent: *
-Allow: *
+Allow: /$
+Allow: /bot$
+Allow: /web$
+Allow: /dev$
+Allow: /repo$
+Allow: /logo.png$
+Disallow: /

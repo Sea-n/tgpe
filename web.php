@@ -9,10 +9,7 @@ if (isset($_POST['url'])) {
 		$error[] = "Already Exists."; // Prevent re-create
 
 
-	if (!check_cf_ip($_SERVER['REMOTE_ADDR'] ?? '1.1.1.1'))
-		$error[] = "Please don't hack me";
-
-	$author = "WEB{$_SERVER['HTTP_CF_CONNECTING_IP']}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
+	$author = "WEB{$_SERVER['REMOTE_ADDR']}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
 	$data = $db->findByAuthor($author);
 	if ($_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW' && count($data) >= 3) {
 		$error[] = "You can only create 3 links in web version";
@@ -141,29 +138,3 @@ EOF;
 </center>
 </body>
 </html>
-<?php
-function check_cf_ip(string $addr) {
-	$range = [
-		"173.245.48.0" => 20,
-		"103.21.244.0" => 22,
-		"103.22.200.0" => 22,
-		"103.31.4.0" => 22,
-		"141.101.64.0" => 18,
-		"108.162.192.0" => 18,
-		"190.93.240.0" => 20,
-		"188.114.96.0" => 20,
-		"197.234.240.0" => 22,
-		"198.41.128.0" => 17,
-		"162.158.0.0" => 15,
-		"104.16.0.0" => 12,
-		"172.64.0.0" => 13,
-		"131.0.72.0" => 22
-	];
-
-	foreach ($range as $base => $cidr)
-		if (ip2long($addr)>>(32-$cidr)
-		=== ip2long($base)>>(32-$cidr))
-			return true;
-
-	return false;
-}
