@@ -170,7 +170,17 @@ if (strlen($code) > 16) { /* Check Code Length */
 } else if (strlen($code) === 0) { /* Allocate 3-char not-exists code */
 	if ($code = $db->findCodeByUrl($url)) {
 		$TG->sendMsg([
-			'text' => "Success!\n\nhttps://tg.pe/$code"
+			'text' => "Success!\n\nhttps://tg.pe/$code",
+			'reply_markup' => [
+				'inline_keyboard' => [
+					[
+						[
+							'text' => 'Screen Message',
+							'url' => "https://www.sean.taipei/sm#t=tg.pe%2F$code"
+						]
+					]
+				]
+			]
 		]);
 		exit;
 	} else
@@ -215,7 +225,17 @@ $error = $db->insert($code, $url, $author);
 
 if ($error[0] === '00000')
 	$TG->sendMsg([
-		'text' => "Success!\n\nhttps://tg.pe/$code"
+		'text' => "Success!\n\nhttps://tg.pe/$code",
+		'reply_markup' => [
+			'inline_keyboard' => [
+				[
+					[
+						'text' => 'Screen Message',
+						'url' => "https://www.sean.taipei/sm#t=tg.pe%2F$code"
+					]
+				]
+			]
+		]
 	]);
 else
 	$TG->sendMsg([
