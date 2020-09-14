@@ -178,6 +178,12 @@ if (strlen($code) > 16) { /* Check Code Length */
 							'text' => 'Screen Message',
 							'url' => "https://www.sean.taipei/sm#t=tg.pe%2F$code"
 						]
+					],
+					[
+						[
+							'text' => 'QRCode',
+							'url' => "https://chart.googleapis.com/chart?chs=512x512&cht=qr&chl=https://tg.pe/$code&choe=UTF-8"
+						]
 					]
 				]
 			]
