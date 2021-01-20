@@ -9,7 +9,8 @@ if (isset($_POST['url'])) {
 		$error[] = "Already Exists."; // Prevent re-create
 
 
-	$author = "WEB{$_SERVER['REMOTE_ADDR']}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
+	$ip_addr = $_SERVER['REMOTE_ADDR'];
+	$author = "WEB{$ip_addr}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
 	$data = $db->findByAuthor($author);
 	if ($_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW' && count($data) >= 3) {
 		$error[] = "You can only create 3 links in web version";
@@ -31,8 +32,28 @@ if (isset($_POST['url'])) {
 	if (strpos($url, "fbclid="))
 		$error[] = "Please remove fbclid before sharing URLs.";
 
+	if (strpos($ip_addr, ':') === false) {
+		$long = ip2long($ip_addr);
+		$ipv4_blacklist = [
+			['54.39.0.0',     '54.39.255.255'  ],
+			['78.108.176.0',  '78.108.191.255' ],
+			['129.205.113.0', '129.205.113.255'],
+			['156.146.58.0',  '156.146.59.255' ],
+			['192.241.128.0', '192.241.255.255'],
+			['193.9.112.0',   '193.9.112.255'  ],
+			['200.25.20.0',   '200.25.23.255'  ],
+		];
+		foreach ($ipv4_blacklist as $item)
+			if (ip2long($item[0]) <= $long && $long <= ip2long($item[1]))
+				$error[] = 'Your IP address is banned by admin.';
+	}
+
 	$domain = $matches['domain'] ?? 'url broken';
-	if (strtolower(substr($domain, -5)) == 'tg.pe')
+	if (in_array($domain, [
+		'tg.pe',
+		'han.gl',
+		'rebrand.ly',
+	]))
 		$error[] = 'Short enough';
 
 
