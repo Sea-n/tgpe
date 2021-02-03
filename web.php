@@ -41,6 +41,7 @@ if (isset($_POST['url'])) {
 			['156.146.58.0',  '156.146.59.255' ],
 			['192.241.128.0', '192.241.255.255'],
 			['193.9.112.0',   '193.9.112.255'  ],
+			['197.211.58.0',  '197.211.58.255' ],
 			['200.25.20.0',   '200.25.23.255'  ],
 		];
 		foreach ($ipv4_blacklist as $item)
@@ -49,11 +50,12 @@ if (isset($_POST['url'])) {
 	}
 
 	$domain = $matches['domain'] ?? 'url broken';
-	if (in_array($domain, [
+	if (preg_match('/(' . implode('|', [
 		'tg.pe',
 		'han.gl',
+		'mzf.cz',
 		'rebrand.ly',
-	]))
+	]) . ')$/i', $domain))
 		$error[] = 'Short enough';
 
 
