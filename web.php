@@ -53,12 +53,33 @@ if (isset($_POST['url'])) {
 	$domain = $matches['domain'] ?? 'url broken';
 	if (preg_match('/(' . implode('|', [
 		'tg.pe',
+		'g6.cz',
 		'goo.io',
 		'han.gl',
 		'mzf.cz',
+		'twr.kr',
 		'rebrand.ly',
 	]) . ')$/i', $domain))
 		$error[] = 'Short enough';
+
+	// AbuseIPDB
+	if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
+		$curl = curl_init();
+		curl_setopt_array($curl, [
+			CURLOPT_URL => "https://api.abuseipdb.com/api/v2/check?ipAddress={$ip_addr}",
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_HTTPHEADER => [
+				'Key: ' . ABUSEIPDB_KEY,
+			],
+		]);
+		$abuseipdb = json_decode(curl_exec($curl), true);
+		curl_close($curl);
+
+		if ($abuseipdb['data']['abuseConfidenceScore'] ?? 0 > 75) {
+			$error[] = 'Your IP address is in the AbuseIPDB.';
+		}
+		error_log("ip_addr={$ip_addr}, abuseConfidenceScore={$abuseipdb['data']['abuseConfidenceScore']}");
+	}
 
 
 	if (count($error) === 0) {
