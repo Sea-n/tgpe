@@ -225,6 +225,16 @@ if (strpos($url, "fbclid=")) {
 }
 /* Both $url and $code should be clean */
 
+if (in_array($TG->FromID, [
+	393581432,
+])) {
+	$TG->sendMsg([
+		'parse_mode' => 'Markdown',
+		'text' => '*You have been banned.*',
+	]);
+	exit;
+}
+
 
 /* Create Record */
 $error = $db->insert($code, $url, $author);
