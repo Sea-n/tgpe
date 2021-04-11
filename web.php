@@ -12,14 +12,14 @@ if (isset($_POST['url'])) {
 	$ip_addr = $_SERVER['REMOTE_ADDR'];
 	$author = "WEB{$ip_addr}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
 	$data = $db->findByAuthor($author);
-	if ($_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW' && count($data) >= 3) {
-		$error[] = "You can only create 3 links in web version";
+	if ($_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW' && count($data) >= 1) {
+		$error[] = "You can only create 1 links in web version";
 	}
 
-	if ($_SERVER["HTTP_CF_IPCOUNTRY"] == 'TW' && count($data) >= 5) {
+	if ($_SERVER["HTTP_CF_IPCOUNTRY"] == 'TW' && count($data) >= 3) {
 		$last = strtotime(end($data)['created_at']);
 		if (time() - $last <= 10 * 60)
-			$error[] = "You can only create 5 links in web version";
+			$error[] = "You can only create 3 links in web version";
 	}
 
 
@@ -35,27 +35,38 @@ if (isset($_POST['url'])) {
 	if (strpos($ip_addr, ':') === false) {
 		$long = ip2long($ip_addr);
 		$ipv4_blacklist = [
-			['45.91.20.0',    '45.91.23.255'   ],
-			['54.39.0.0',     '54.39.255.255'  ],
-			['78.108.176.0',  '78.108.191.255' ],
-			['82.80.16.0',    '82.80.31.255'   ],
-			['84.17.32.0',    '84.17.63.255'   ],
-			['89.41.26.0',    '89.41.26.255'   ],
-			['92.118.13.0',   '92.118.13.255'  ],
-			['102.100.0.0',   '102.103.255.255'],
+			['5.62.56.0',     '5.62.57.255'    ],  # AS198605
+			['37.120.192.0',  '37.120.223.255' ],  # AS9009 (GlobalAX)
+			['41.248.0.0',    '41.252.255.255' ],  # AS36903 (Maroc telecom)
+			['45.91.20.0',    '45.91.23.255'   ],  # AS9009 (GlobalAX)
+			['54.39.0.0',     '54.39.255.255'  ],  # AS16276 (OVH)
+			['78.108.176.0',  '78.108.191.255' ],  # AS62160
+			['82.80.16.0',    '82.80.31.255'   ],  # AS8551
+			['82.102.16.0',   '82.102.31.255'  ],  # AS9009 (GlobalAX)
+			['84.17.32.0',    '84.17.63.255'   ],  # AS60068 (CDN77)
+			['89.41.26.0',    '89.41.26.255'   ],  # AS9009 (GlobalAX)
+			['92.118.13.0',   '92.118.13.255'  ],  # AS29066
+			['102.100.0.0',   '102.103.255.255'],  # AS36925
+			['105.128.0.0',   '105.159.255.255'],  # AS36903 (Maroc telecom)
+			['114.79.0.0',    '114.79.63.255'  ],  # AS18004 (Wireless Indonesia)
 			['129.205.113.0', '129.205.113.255'],
+			['138.199.0.0',   '138.199.62.255' ],  # AS212238 (CDN77)
 			['154.16.51.0',   '154.16.51.255'  ],
 			['156.146.58.0',  '156.146.59.255' ],
-			['157.245.0.0',   '157.245.255.255'],
-			['160.120.0.0',   '160.120.255.255'],
+			['157.245.0.0',   '157.245.255.255'],  # AS14061 (DigitalOcean)
+			['160.120.0.0',   '160.120.255.255'],  # Orange
 			['176.67.80.0',   '176.67.87.255'  ],
 			['185.54.228.0',  '185.54.228.255' ],
+			['185.232.20.0',  '185.232.23.255' ],  # AS9009 (GlobalAX)
+			['185.246.208.0', '185.246.211.255'],  # AS60068 (CDN77)
+			['188.126.64.0',  '188.126.95.255' ],  # AS42708 (Portlan)
 			['192.241.128.0', '192.241.255.255'],
 			['193.9.112.0',   '193.9.115.255'  ],
 			['193.176.84.0',  '193.176.87.255' ],
 			['196.74.0.0',    '196.74.255.255' ],
 			['197.211.58.0',  '197.211.58.255' ],
 			['200.25.20.0',   '200.25.23.255'  ],
+			['206.189.0.0',   '206.189.255.255'],  # AS14061 (DigitalOcean)
 		];
 		foreach ($ipv4_blacklist as $item)
 			if (ip2long($item[0]) <= $long && $long <= ip2long($item[1]))
@@ -65,16 +76,25 @@ if (isset($_POST['url'])) {
 	$domain = $matches['domain'] ?? 'url broken';
 	if (preg_match('/(' . implode('|', [
 		'tg.pe',
+		's.id',
 		'g6.cz',
+		'gg.gg',
 		'is.gd',
+		'ml.tc',
+		'bit.ly',
 		'goo.io',
 		'han.gl',
 		'mzf.cz',
 		'twr.kr',
+		'web.app',
+		'xsph.ru',
+		'reurl.cc',
 		'appIe.link',
 		'rebrand.ly',
 		'wixsite.com',
 		'yolasite.com',
+		'moonfruit.com',
+		'pantheonsite.io',
 	]) . ')$/i', $domain))
 		$error[] = 'Domain have been banned.';
 
