@@ -35,7 +35,7 @@ if (isset($_POST['url'])) {
 	if (strpos($ip_addr, ':') === false) {
 		$long = ip2long($ip_addr);
 		$ipv4_blacklist = [
-			['5.62.56.0',     '5.62.57.255'    ],  # AS198605
+			['5.62.0.0',      '5.62.63.255'    ],  # AS198605 (Avast)
 			['37.120.192.0',  '37.120.223.255' ],  # AS9009 (GlobalAX)
 			['41.248.0.0',    '41.252.255.255' ],  # AS36903 (Maroc telecom)
 			['45.91.20.0',    '45.91.23.255'   ],  # AS9009 (GlobalAX)
@@ -65,7 +65,7 @@ if (isset($_POST['url'])) {
 			['193.176.84.0',  '193.176.87.255' ],
 			['196.74.0.0',    '196.74.255.255' ],
 			['197.211.58.0',  '197.211.58.255' ],
-			['200.25.20.0',   '200.25.23.255'  ],
+			['200.25.00.0',   '200.25.127.255' ],  # AS7195 (EdgeUno)
 			['206.189.0.0',   '206.189.255.255'],  # AS14061 (DigitalOcean)
 		];
 		foreach ($ipv4_blacklist as $item)
@@ -81,6 +81,7 @@ if (isset($_POST['url'])) {
 		'gg.gg',
 		'is.gd',
 		'ml.tc',
+		'sl.al',
 		'bit.ly',
 		'goo.io',
 		'han.gl',
@@ -91,6 +92,7 @@ if (isset($_POST['url'])) {
 		'reurl.cc',
 		'appIe.link',
 		'rebrand.ly',
+		'weebly.com',
 		'wixsite.com',
 		'yolasite.com',
 		'moonfruit.com',
