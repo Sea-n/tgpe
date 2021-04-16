@@ -227,6 +227,7 @@ if (strpos($url, "fbclid=")) {
 
 if (in_array($TG->FromID, [
 	393581432,
+	926085392,
 ])) {
 	$TG->sendMsg([
 		'parse_mode' => 'Markdown',

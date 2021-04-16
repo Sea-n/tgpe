@@ -36,6 +36,7 @@ if (isset($_POST['url'])) {
 		$long = ip2long($ip_addr);
 		$ipv4_blacklist = [
 			['5.62.0.0',      '5.62.63.255'    ],  # AS198605 (Avast)
+			['23.19.0.0',     '23.19.255.255'  ],  # AS395954 (LeaseWeb)
 			['37.120.192.0',  '37.120.223.255' ],  # AS9009 (GlobalAX)
 			['41.248.0.0',    '41.252.255.255' ],  # AS36903 (Maroc telecom)
 			['45.91.20.0',    '45.91.23.255'   ],  # AS9009 (GlobalAX)
@@ -45,6 +46,7 @@ if (isset($_POST['url'])) {
 			['82.102.16.0',   '82.102.31.255'  ],  # AS9009 (GlobalAX)
 			['84.17.32.0',    '84.17.63.255'   ],  # AS60068 (CDN77)
 			['89.41.26.0',    '89.41.26.255'   ],  # AS9009 (GlobalAX)
+			['89.187.160.0',  '89.187.191.255' ],  # AS60068 (CDN77)
 			['92.118.13.0',   '92.118.13.255'  ],  # AS29066
 			['102.100.0.0',   '102.103.255.255'],  # AS36925
 			['105.128.0.0',   '105.159.255.255'],  # AS36903 (Maroc telecom)
@@ -56,6 +58,7 @@ if (isset($_POST['url'])) {
 			['157.245.0.0',   '157.245.255.255'],  # AS14061 (DigitalOcean)
 			['160.120.0.0',   '160.120.255.255'],  # Orange
 			['176.67.80.0',   '176.67.87.255'  ],
+			['180.240.0.0',   '180.254.255.255'],  # AS17974 (Telkom Indonesia)
 			['185.54.228.0',  '185.54.228.255' ],
 			['185.232.20.0',  '185.232.23.255' ],  # AS9009 (GlobalAX)
 			['185.246.208.0', '185.246.211.255'],  # AS60068 (CDN77)
@@ -77,26 +80,36 @@ if (isset($_POST['url'])) {
 	if (preg_match('/(' . implode('|', [
 		'tg.pe',
 		's.id',
+		'6f.sk',
 		'g6.cz',
 		'gg.gg',
 		'is.gd',
 		'ml.tc',
 		'sl.al',
+		'vo.la',
 		'bit.ly',
 		'goo.io',
 		'han.gl',
 		'mzf.cz',
 		'twr.kr',
+		'cutt.ly',
+		'cutt.us',
+		'ism.run',
+		'lite.al',
+		'risu.io',
 		'web.app',
 		'xsph.ru',
+		'applk.io',
 		'reurl.cc',
 		'appIe.link',
+		'onelink.me',
 		'rebrand.ly',
 		'weebly.com',
 		'wixsite.com',
 		'yolasite.com',
 		'moonfruit.com',
 		'pantheonsite.io',
+		'coralandherb.com.au',
 	]) . ')$/i', $domain))
 		$error[] = 'Domain have been banned.';
 
