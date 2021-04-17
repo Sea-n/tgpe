@@ -68,12 +68,12 @@ if (isset($_POST['url'])) {
 			['193.176.84.0',  '193.176.87.255' ],
 			['196.74.0.0',    '196.74.255.255' ],
 			['197.211.58.0',  '197.211.58.255' ],
-			['200.25.00.0',   '200.25.127.255' ],  # AS7195 (EdgeUno)
+			['200.25.0.0',    '200.25.127.255' ],  # AS7195 (EdgeUno)
 			['206.189.0.0',   '206.189.255.255'],  # AS14061 (DigitalOcean)
 		];
 		foreach ($ipv4_blacklist as $item)
 			if (ip2long($item[0]) <= $long && $long <= ip2long($item[1]))
-				$error[] = 'Your IP address is banned by admin.';
+				$error[] = "Your IP address is banned by admin. ({$item[0]} - {$item[1]})";
 	}
 
 	$domain = $matches['domain'] ?? 'url broken';
@@ -194,8 +194,8 @@ if (!isset($_POST['url'])) {
 			url.focus();
 		</script>
 EOF;
-	} else if (!empty($code)) {
-		echo <<<EOF
+} else if (!empty($code)) {
+	echo <<<EOF
 <p>Your Link: <input id="link" value="https://tg.pe/$code" size="14"><button id="copyButton" onclick="copyLink()">Copy</button></p>
 <script>
 function copyLink() {
@@ -214,12 +214,12 @@ function copyLink() {
 }
 </script>
 EOF;
-	} else if (count($error)) {
-		echo <<<EOF
+} else if (count($error)) {
+	echo <<<EOF
 <p style='color: red;'>ERROR: {$error[0]}</p>
 <p>Goto <a href='/'>Homepage</a>.</p>
 EOF;
-	}
+}
 ?>
 		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
 		Use Telegram Bot to get unlimited access for free.</small>
