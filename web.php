@@ -32,7 +32,10 @@ if (isset($_POST['url'])) {
 	if (strpos($url, "fbclid="))
 		$error[] = "Please remove fbclid before sharing URLs.";
 
-	if (strpos($ip_addr, ':') === false) {
+	if (strpos($ip_addr, ':') !== false) {
+		if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW')
+			$error[] = 'IPv6 source address is not supported except for Taiwan.';
+	} else {  # IPv4
 		$long = ip2long($ip_addr);
 		$ipv4_blacklist = [
 			['5.62.0.0',      '5.62.63.255'    ],  # AS198605 (Avast)
@@ -47,19 +50,27 @@ if (isset($_POST['url'])) {
 			['84.17.32.0',    '84.17.63.255'   ],  # AS60068 (CDN77)
 			['89.41.26.0',    '89.41.26.255'   ],  # AS9009 (GlobalAX)
 			['89.187.160.0',  '89.187.191.255' ],  # AS60068 (CDN77)
+			['91.132.136.0',  '91.132.139.255' ],  # AS9009 (GlobalAX)
 			['92.118.13.0',   '92.118.13.255'  ],  # AS29066
 			['102.100.0.0',   '102.103.255.255'],  # AS36925
+			['102.136.0.0',   '102.139.255.255'],  # Alain
 			['105.128.0.0',   '105.159.255.255'],  # AS36903 (Maroc telecom)
+			['105.235.0.0',   '105.235.255.255'],
 			['114.79.0.0',    '114.79.63.255'  ],  # AS18004 (Wireless Indonesia)
 			['129.205.113.0', '129.205.113.255'],
 			['138.199.0.0',   '138.199.62.255' ],  # AS212238 (CDN77)
-			['154.16.51.0',   '154.16.51.255'  ],
+			['154.0.23.0',    '154.0.28.255'   ],  # Rodrigue
+			['154.16.0.0',    '154.16.241.255' ],  # heficed
 			['156.146.58.0',  '156.146.59.255' ],
+			['156.232.0.0',   '156.235.255.255'],  # mtnci
+			['157.230.0.0',   '157.230.255.255'],  # AS14061 (DigitalOcean)
 			['157.245.0.0',   '157.245.255.255'],  # AS14061 (DigitalOcean)
 			['160.120.0.0',   '160.120.255.255'],  # Orange
+			['160.154.0.0',   '160.159.255.255'],  # Orange
 			['176.67.80.0',   '176.67.87.255'  ],
 			['180.240.0.0',   '180.254.255.255'],  # AS17974 (Telkom Indonesia)
 			['185.54.228.0',  '185.54.228.255' ],
+			['185.230.124.0', '185.230.127.255'],  # AS9009 (GlobalAX)
 			['185.232.20.0',  '185.232.23.255' ],  # AS9009 (GlobalAX)
 			['185.246.208.0', '185.246.211.255'],  # AS60068 (CDN77)
 			['188.126.64.0',  '188.126.95.255' ],  # AS42708 (Portlan)
@@ -70,6 +81,7 @@ if (isset($_POST['url'])) {
 			['197.211.58.0',  '197.211.58.255' ],
 			['200.25.0.0',    '200.25.127.255' ],  # AS7195 (EdgeUno)
 			['206.189.0.0',   '206.189.255.255'],  # AS14061 (DigitalOcean)
+			['213.87.0.0',    '213.87.255.255' ],  # MTS Net
 		];
 		foreach ($ipv4_blacklist as $item)
 			if (ip2long($item[0]) <= $long && $long <= ip2long($item[1]))
@@ -80,6 +92,7 @@ if (isset($_POST['url'])) {
 	if (preg_match('/(' . implode('|', [
 		'tg.pe',
 		's.id',
+		'u.to',
 		'6f.sk',
 		'g6.cz',
 		'gg.gg',
@@ -88,6 +101,7 @@ if (isset($_POST['url'])) {
 		'sl.al',
 		'vo.la',
 		'bit.ly',
+		'btc.do',
 		'goo.io',
 		'had.wf',
 		'han.gl',
@@ -96,24 +110,35 @@ if (isset($_POST['url'])) {
 		'cutt.ly',
 		'cutt.us',
 		'ism.run',
+		'kutt.it',
 		'lite.al',
 		'risu.io',
+		'urlr.me',
+		'urlz.fr',
 		'web.app',
 		'xsph.ru',
 		'applk.io',
+		'curto.me',
+		'tmweb.ru',
 		'reurl.cc',
 		'ogtrk.net',
 		'page.link',
 		'appIe.link',
+		'flazio.com',
 		'onelink.me',
 		'rebrand.ly',
 		'weebly.com',
+		'adayline.ru',
+		'tinyurl.com',
+		'webador.com',
 		'wixsite.com',
 		'yolasite.com',
 		'bigappboi.com',
 		'moonfruit.com',
+		'firebaseapp.com',
 		'pantheonsite.io',
 		'godaddysites.com',
+		'sites.google.com',
 		'coralandherb.com.au',
 	]) . ')$/i', $domain))
 		$error[] = 'Domain have been banned.';
