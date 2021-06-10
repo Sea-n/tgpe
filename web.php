@@ -40,9 +40,10 @@ if (isset($_POST['url'])) {
 		$ipv4_blacklist = [
 			['5.62.0.0',      '5.62.63.255'    ],  # AS198605 (Avast)
 			['23.19.0.0',     '23.19.255.255'  ],  # AS395954 (LeaseWeb)
-			['37.120.192.0',  '37.120.223.255' ],  # AS9009 (GlobalAX)
+			['37.120.0.0',    '37.120.255.255' ],  # AS9009 (GlobalAX)
 			['41.248.0.0',    '41.252.255.255' ],  # AS36903 (Maroc telecom)
 			['45.91.20.0',    '45.91.23.255'   ],  # AS9009 (GlobalAX)
+			['45.248.0.0',    '45.248.255.255' ],  # AS136557 (Host Universal)
 			['54.39.0.0',     '54.39.255.255'  ],  # AS16276 (OVH)
 			['78.108.176.0',  '78.108.191.255' ],  # AS62160
 			['82.80.16.0',    '82.80.31.255'   ],  # AS8551
@@ -56,9 +57,11 @@ if (isset($_POST['url'])) {
 			['102.136.0.0',   '102.139.255.255'],  # Alain
 			['105.128.0.0',   '105.159.255.255'],  # AS36903 (Maroc telecom)
 			['105.235.0.0',   '105.235.255.255'],
+			['108.61.0.0',    '108.61.255.255' ],  # Vultr
 			['114.79.0.0',    '114.79.63.255'  ],  # AS18004 (Wireless Indonesia)
 			['129.205.113.0', '129.205.113.255'],
 			['138.199.0.0',   '138.199.62.255' ],  # AS212238 (CDN77)
+			['143.245.0.0',   '143.245.255.255'],  # AS60068 (CDN77)
 			['154.0.23.0',    '154.0.28.255'   ],  # Rodrigue
 			['154.16.0.0',    '154.16.241.255' ],  # heficed
 			['156.146.58.0',  '156.146.59.255' ],
@@ -91,6 +94,11 @@ if (isset($_POST['url'])) {
 	$domain = $matches['domain'] ?? 'url broken';
 	if (preg_match('/(' . implode('|', [
 		'tg.pe',
+		'cf',
+		'ga',
+		'gq',
+		'ml',
+		'tk',
 		's.id',
 		'u.to',
 		'6f.sk',
@@ -105,11 +113,13 @@ if (isset($_POST['url'])) {
 		'goo.io',
 		'had.wf',
 		'han.gl',
+		'lrl.kr',
 		'mzf.cz',
 		'twr.kr',
 		'cutt.ly',
 		'cutt.us',
 		'ism.run',
+		'itiy.in',
 		'kutt.it',
 		'lite.al',
 		'risu.io',
@@ -123,10 +133,12 @@ if (isset($_POST['url'])) {
 		'reurl.cc',
 		'ogtrk.net',
 		'page.link',
+		'swtest.ru',
 		'appIe.link',
 		'flazio.com',
 		'onelink.me',
 		'rebrand.ly',
+		'soft24.net',
 		'weebly.com',
 		'adayline.ru',
 		'tinyurl.com',
@@ -139,6 +151,7 @@ if (isset($_POST['url'])) {
 		'pantheonsite.io',
 		'godaddysites.com',
 		'sites.google.com',
+		'funnylove.monster',
 		'coralandherb.com.au',
 	]) . ')$/i', $domain))
 		$error[] = 'Domain have been banned.';
