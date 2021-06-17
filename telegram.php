@@ -225,10 +225,7 @@ if (strpos($url, "fbclid=")) {
 }
 /* Both $url and $code should be clean */
 
-if (in_array($TG->FromID, [
-	393581432,
-	926085392,
-])) {
+if (in_array($TG->FromID, $tg_blacklist)) {
 	$TG->sendMsg([
 		'parse_mode' => 'Markdown',
 		'text' => '*You have been banned.*',
@@ -240,7 +237,7 @@ if (in_array($TG->FromID, [
 /* Create Record */
 $error = $db->insert($code, $url, $author);
 
-if ($error[0] === '00000')
+if ($error[0] === '00000') {
 	$TG->sendMsg([
 		'text' => "Success!\n\nhttps://tg.pe/$code",
 		'reply_markup' => [
@@ -254,7 +251,17 @@ if ($error[0] === '00000')
 			]
 		]
 	]);
-else
+
+	if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain))
+		$TG->sendMsg([
+			'chat_id' => TG_ADMINS[0],
+			'parse_mode' => 'HTML',
+			'text' => "Warning: blacklisted URL\n\n" .
+				"URL: $url\n" .
+				"Code: <code>$code</code>\n" .
+				"Author: #$author (@{$TG->data['message']['from']['username']})",
+		]);
+} else
 	$TG->sendMsg([
 		'text' => "ERROR: Something went Wrong, please contact @S_ean\n\n" .
 		"Code: $code\n" .
