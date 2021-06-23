@@ -1,4 +1,6 @@
 <?php
+require('config.php');
+
 if (isset($_POST['url'])) {
 	require('database.php');
 	$db = new MyDB();
