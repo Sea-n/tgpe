@@ -252,6 +252,8 @@ if ($error[0] === '00000') {
 		]
 	]);
 
+	$cnt = count($db->findByAuthor($author));  // Prev count + this one
+
 	if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain))
 		$TG->sendMsg([
 			'chat_id' => TG_ADMINS[0],
@@ -261,12 +263,32 @@ if ($error[0] === '00000') {
 				"Code: <code>$code</code>\n" .
 				"Author: #$author (@{$TG->data['message']['from']['username']})",
 		]);
-} else
+	else if ($cnt <= 3)
+		$TG->sendMsg([
+			'chat_id' => TG_ADMINS[0],
+			'parse_mode' => 'HTML',
+			'text' => "Notice: New user create their first {$cnt} links\n\n" .
+				"URL: $url\n" .
+				"Code: <code>$code</code>\n" .
+				"Author: #$author (@{$TG->data['message']['from']['username']})",
+		]);
+} else {
+	$TG->sendMsg([
+		'chat_id' => TG_ADMINS[0],
+		'text' => "ERROR: Something went Wrong:\n\n" .
+		"URL: $url\n" .
+		"Code: $code\n" .
+		"Author: #$author (@{$TG->data['message']['from']['username']})\n\n" .
+		"PDO Error Info:\n" .
+		json_encode($error, JSON_PRETTY_PRINT)
+	]);
+
 	$TG->sendMsg([
 		'text' => "ERROR: Something went Wrong, please contact @S_ean\n\n" .
-		"Code: $code\n" .
 		"URL: $url\n" .
+		"Code: $code\n" .
 		"Author: $author\n\n" .
 		"PDO Error Info:\n" .
 		json_encode($error, JSON_PRETTY_PRINT)
 	]);
+}

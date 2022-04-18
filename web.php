@@ -63,8 +63,8 @@ if (isset($_POST['url'])) {
 
 		if ($abuseipdb['data']['abuseConfidenceScore'] ?? 0 > 75) {
 			$error[] = 'Your IP address is in the AbuseIPDB.';
+			error_log("ip_addr={$ip_addr}, abuseConfidenceScore={$abuseipdb['data']['abuseConfidenceScore']}");
 		}
-		error_log("ip_addr={$ip_addr}, abuseConfidenceScore={$abuseipdb['data']['abuseConfidenceScore']}");
 	}
 
 
