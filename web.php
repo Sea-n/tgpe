@@ -38,10 +38,27 @@ if (isset($_POST['url'])) {
 		if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW')
 			$error[] = 'IPv6 source address is not supported except for Taiwan.';
 	} else {  # IPv4
-		$long = ip2long($ip_addr);
-		foreach ($ipv4_blacklist as $item)
-			if (ip2long($item[0]) <= $long && $long <= ip2long($item[1]))
-				$error[] = "Your IP address is banned by admin. ({$item[0]} - {$item[1]})";
+		if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
+			$ipb = base64_encode($ip_addr . "\n");
+			$cmd = "echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1";
+			$ASN = 'AS' . explode(' ', shell_exec($cmd))[0];
+
+			foreach ($asn_blacklist as $asn => $name)
+				if ($ASN == $asn)
+					$error[] = "Your ISP “{$name}” ($ASN) is banned by admin.";
+
+			$IPQ = file_get_contents(IPQ_URL . $ip_addr);
+			$IPQ = json_decode($IPQ, true);
+			foreach (['tor', 'vpn', 'proxy'] as $item)
+				if ($IPQ[$item] == true)
+					$error[] = "Your IP address is identified as $item";
+
+			$ipb = base64_encode($ip_addr);
+			$ASN = 'AS' . shell_exec("echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1 | cut -d ' ' -f 1");
+			foreach ($asn_blacklist as $asn => $name)
+				if ("AS{$ASN}" == $asn)
+					$error[] = "Your ISP “$name” ($ASN) is banned by admin.";
+		}
 	}
 
 	$domain = $matches['domain'] ?? 'url broken';
@@ -158,13 +175,15 @@ EOF;
 ?>
 		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
 		Use Telegram Bot to get unlimited access for free.</small>
+
+		<p>For abuse report, please send it to <a href="mailto:abuse@tg.pe">abuse@tg.pe</a>, we will proceed within 24 hours.</p>
 	</div>
 	<br>
 </div>
 <div class="footer">
 	<footer id="footer">
-		<p>Source Code: <a href="https://github.com/Sea-n/tgpe">Sea-n/tgpe</a><br>
-		Developed by <a href="https://www.sean.taipei/">Sean</a>.</p>
+		<p>Source Code: <a href="https://github.com/Sea-n/tgpe">Sea-n/tgpe</a>
+		| Developed by <a href="https://www.sean.taipei/">Sean</a>.</p>
 	</footer>
 </div>
 </center>
