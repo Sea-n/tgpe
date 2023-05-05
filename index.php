@@ -1,5 +1,5 @@
 <?php
-require('database.php');
+require_once('database.php');
 
 $uri = $_SERVER['REQUEST_URI']; // $_SERVER['REQUEST_URI'] = string(5) "/path?query=xx"
 

@@ -1,6 +1,6 @@
 <?php
-require('config.php');
-require('database.php');
+require_once('config.php');
+require_once('database.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 	header("HTTP/2 405 Method Not Allowed");

@@ -3,7 +3,7 @@
 if (!isset($argv[1]))
 	exit;
 
-require('/usr/share/nginx/tg.pe/database.php');
+require_once('/usr/share/nginx/tg.pe/database.php');
 $db = new MyDB();
 
 

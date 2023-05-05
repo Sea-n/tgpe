@@ -1,5 +1,5 @@
 <?php
-require('config.php');
+require_once('config.php');
 
 if (isset($_POST['url'])) {
 	require('database.php');
@@ -25,7 +25,7 @@ if (isset($_POST['url'])) {
 	}
 
 
-	if (!preg_match('#^https?://(?P<domain>[^\n\s@%/]+\.[^\n\s@%/]+)(?:/[^\n\s]*)?$#i', $url, $matches))
+	if (!preg_match('#^https?://(?P<domain>[^\n\s@%/?]+\.[^\n\s@%/?]+)(?:/[^\n\s]*)?$#i', $url, $matches))
 		$error[] = "Please send a Vaild URL.";
 
 	if (!filter_var($url, FILTER_VALIDATE_URL))
@@ -46,12 +46,6 @@ if (isset($_POST['url'])) {
 			foreach ($asn_blacklist as $asn => $name)
 				if ($ASN == $asn)
 					$error[] = "Your ISP “{$name}” ($ASN) is banned by admin.";
-
-			$IPQ = file_get_contents(IPQ_URL . $ip_addr);
-			$IPQ = json_decode($IPQ, true);
-			foreach (['tor', 'vpn', 'proxy'] as $item)
-				if ($IPQ[$item] == true)
-					$error[] = "Your IP address is identified as $item";
 
 			$ipb = base64_encode($ip_addr);
 			$ASN = 'AS' . shell_exec("echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1 | cut -d ' ' -f 1");

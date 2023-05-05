@@ -3,8 +3,8 @@
 if (!isset($TG))
 	exit;
 
-require('/usr/share/nginx/tg.pe/config.php');
-require('/usr/share/nginx/tg.pe/database.php');
+require_once('/usr/share/nginx/tg.pe/config.php');
+require_once('/usr/share/nginx/tg.pe/database.php');
 $db = new MyDB();
 
 
@@ -133,6 +133,7 @@ $domain = $matches['domain'];
 $code = $matches['code'] ?? '';
 $author = "TG{$TG->FromID}";
 
+# php8.1-intl IDN function
 if (idn_to_ascii($domain) !== $domain) {
 	$domain = idn_to_ascii($domain);
 	$path = $matches['path'] ?? '/';
