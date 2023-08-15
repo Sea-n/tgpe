@@ -16,7 +16,7 @@ if ($path == '/') { // index homepage
 }
 
 if (!preg_match('#^/[\w_-]+(\.[a-z]+)?$#', $path))
-	error(400, 'Code invalid');
+	error(400, 'Link invalid');
 
 $path = explode('.', substr($path, 1), 2);
 $code = $path[0];
@@ -28,9 +28,12 @@ else
 $db = new MyDB();
 
 if (!$data = $db->findByCode($code))
-	error(404, 'Code not found');
+	error(404, 'Link not found');
 
 $url = $data['url'];
+if ($url == 'https://tg.pe/') {
+	error(404, 'Page removed');
+}
 
 if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT|curl|Wget)#i", $_SERVER['HTTP_USER_AGENT'] ?? '')
 	|| (substr($url, -strlen($ext)) == $ext && in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp']))) {
@@ -78,7 +81,7 @@ function error(int $code, string $msg) {
 	echo <<<EOF
 <html>
 <head>
-	<meta http-equiv="refresh" content="10;url=https://tg.pe/" />
+	<meta http-equiv="refresh" content="5;url=https://tg.pe/" />
 </head>
 <body>
 	<center>

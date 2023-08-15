@@ -168,7 +168,7 @@ EOF;
 }
 ?>
 		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
-		Use Telegram Bot to get unlimited access for free.</small>
+		Use Telegram Bot <a href="https://t.me/tgpebot">@tgpebot</a> to get unlimited access for free.</small>
 
 		<p>For abuse report, please send it to <a href="mailto:abuse@tg.pe">abuse@tg.pe</a>, we will proceed within 24 hours.</p>
 	</div>
