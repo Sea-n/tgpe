@@ -41,19 +41,19 @@ if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okht
 	exit;
 }
 
-echo <<<EOF
+?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 EOF;
+<?php
 if (!in_array($code, ['bot', 'dev', 'repo']))
 	echo '<meta name="robots" content="noindex,nosnippet">';
-
-echo <<<EOF
+?>
 </head>
 <body>
-	<p>Redirecting to <a id="url" href="$url">$url</a>....</p>
+	<p>Redirecting to <a id="url" href="<?= $url ?>"><?= $url ?></a>....</p>
 	<script>
 		window.onload = function() {
 			var target = document.getElementById('url').href;
@@ -62,8 +62,7 @@ echo <<<EOF
 	</script>
 </body>
 </html>
-EOF;
-
+<?php
 
 function error(int $code, string $msg) {
 	switch ($code) {

@@ -2,7 +2,7 @@
 require_once('config.php');
 
 if (isset($_POST['url'])) {
-	require('database.php');
+	require_once('database.php');
 	$db = new MyDB();
 	$error = []; // Default no error
 
@@ -34,30 +34,17 @@ if (isset($_POST['url'])) {
 	if (strpos($url, "fbclid="))
 		$error[] = "Please remove fbclid before sharing URLs.";
 
-	if (strpos($ip_addr, ':') !== false) {
-		if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW')
-			$error[] = 'IPv6 source address is not supported except for Taiwan.';
-	} else {  # IPv4
-		if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
-			$ipb = base64_encode($ip_addr . "\n");
-			$cmd = "echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1";
-			$ASN = 'AS' . explode(' ', shell_exec($cmd))[0];
-
-			foreach ($asn_blacklist as $asn => $name)
-				if ($ASN == $asn)
-					$error[] = "Your ISP “{$name}” ($ASN) is banned by admin.";
-
-			$ipb = base64_encode($ip_addr);
-			$ASN = 'AS' . shell_exec("echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1 | cut -d ' ' -f 1");
-			foreach ($asn_blacklist as $asn => $name)
-				if ("AS{$ASN}" == $asn)
-					$error[] = "Your ISP “$name” ($ASN) is banned by admin.";
-		}
+	if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
+		$ipb = base64_encode($ip_addr);
+		$ASN = 'AS' . shell_exec("echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1 | cut -d ' ' -f 1");
+		foreach ($asn_blacklist as $asn => $name)
+			if ("AS{$ASN}" == $asn)
+				$error[] = "Your ISP “$name” ($ASN) is banned by admin. Please use Telegram version instead.";
 	}
 
 	$domain = $matches['domain'] ?? 'url broken';
 	if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain))
-		$error[] = 'Domain have been banned.';
+		$error[] = 'High-risk domain, only allowed in Telegram version.';
 
 	// AbuseIPDB
 	if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
@@ -120,10 +107,8 @@ if (isset($_POST['url'])) {
 	<div id="gen">
 		<big>Limited Online Version</big>
 
-<?php
-if (!isset($_POST['url'])) {
-	echo <<<EOF
-		<form method="POST" action="/web">
+<?php if (!isset($_POST['url'])) { ?>
+		<form method="POST" action="/">
 			<p>Your URL:<br>
 			<span class='input'>
 				<input name="url" id="url" size="30" placeholder="https://www.sean.taipei/">
@@ -139,10 +124,8 @@ if (!isset($_POST['url'])) {
 			var url = document.getElementById("url");
 			url.focus();
 		</script>
-EOF;
-} else if (!empty($code)) {
-	echo <<<EOF
-<p>Your Link: <input id="link" value="https://tg.pe/$code" size="14"><button id="copyButton" onclick="copyLink()">Copy</button></p>
+<?php } else if (!empty($code)) { ?>
+<p>Your Link: <input id="link" value="https://tg.pe/<?= $code ?>" size="14"><button id="copyButton" onclick="copyLink()">Copy</button></p>
 <script>
 function copyLink() {
 	var copyText = document.getElementById("link");
@@ -159,14 +142,10 @@ function copyLink() {
 	}, 2000);
 }
 </script>
-EOF;
-} else if (count($error)) {
-	echo <<<EOF
-<p style='color: red;'>ERROR: {$error[0]}</p>
+<?php } else if (count($error)) { ?>
+<p style='color: red;'>ERROR: <?= $error[0] ?></p>
 <p>Goto <a href='/'>Homepage</a>.</p>
-EOF;
-}
-?>
+<?php } ?>
 		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
 		Use Telegram Bot <a href="https://t.me/tgpebot">@tgpebot</a> to get unlimited access for free.</small>
 
