@@ -182,8 +182,8 @@ if (strlen($code) > 16) { /* Check Code Length */
 					],
 					[
 						[
-							'text' => 'QRCode',
-							'url' => "https://chart.googleapis.com/chart?chs=512x512&cht=qr&chl=https://tg.pe/$code&choe=UTF-8"
+							'text' => 'QR code',
+							'url' => "https://tg.pe/$code/qr"
 						]
 					]
 				]
@@ -251,8 +251,8 @@ if ($error[0] === '00000') {
 				],
 				[
 					[
-						'text' => 'QRCode',
-						'url' => "https://chart.googleapis.com/chart?chs=512x512&cht=qr&chl=https://tg.pe/$code&choe=UTF-8"
+						'text' => 'QR code',
+						'url' => "https://tg.pe/$code/qr"
 					]
 				]
 			]

@@ -15,16 +15,14 @@ if ($path == '/') { // index homepage
 	exit;
 }
 
-if (!preg_match('#^/[\w_-]+(\.[a-z]+)?$#', $path))
+if (!preg_match('#^/([\w_-]+)(\.([a-z]+))?(/(qr))?$#', $path, $matches1))
 	error(400, 'Link invalid');
 
-$path = explode('.', substr($path, 1), 2);
-$code = $path[0];
-if (isset($path[1]))
-	$ext = $path[1];
-else
-	$ext = '';
+$code = $matches1[1];
+$ext = $matches1[3];
+$qr = $matches1[5];
 
+# Retrive $code from database
 $db = new MyDB();
 
 if (!$data = $db->findByCode($code))
@@ -35,10 +33,40 @@ if ($url == 'https://tg.pe/') {
 	error(404, 'Page removed');
 }
 
+# For crawlers and /lnk.png pages, skip the HTML page
 if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT|curl|Wget)#i", $_SERVER['HTTP_USER_AGENT'] ?? '')
 	|| (substr($url, -strlen($ext)) == $ext && in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp']))) {
 	header("Location: $url");
 	exit;
+}
+
+if ($qr == 'qr') {  # For /lnk/qr page
+	echo <<<EOF
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="robots" content="noindex,nosnippet">
+	<style>
+		body {
+			background-color: #f8f8f8;
+		}
+		img.qr {
+			display: block;
+			width: auto;
+			height: auto;
+			max-width: 98vw;
+			max-height: 98vh;
+			margin: auto;
+		}
+	</style>
+</head>
+<body>
+	<img class="qr" src="https://quickchart.io/qr?text=https://tg.pe/$code&size=1200&captionFontSize=72&ecLevel=L&caption=https://tg.pe/$code&captionFontFamily=Courier+New">
+</body>
+</html>
+EOF;
+	exit();
 }
 
 ?>
@@ -46,7 +74,6 @@ if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okht
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-EOF;
 <?php
 if (!in_array($code, ['bot', 'dev', 'repo']))
 	echo '<meta name="robots" content="noindex,nosnippet">';
