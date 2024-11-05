@@ -265,10 +265,14 @@ if ($error[0] === '00000') {
 		$TG->sendMsg([
 			'chat_id' => TG_ADMINS[0],
 			'parse_mode' => 'HTML',
-			'text' => "Warning: blacklisted URL\n\n" .
+			'text' => "Warning: blacklisted URL (cnt=$cnt)\n\n" .
 				"URL: $url\n" .
 				"Code: <code>$code</code>\n" .
 				"Author: #$author (@{$TG->data['message']['from']['username']})",
+			'link_preview_options' => [
+				'url' => $url,
+				'prefer_small_media' => true,
+			],
 		]);
 	else if ($cnt <= 3)
 		$TG->sendMsg([
@@ -278,6 +282,10 @@ if ($error[0] === '00000') {
 				"URL: $url\n" .
 				"Code: <code>$code</code>\n" .
 				"Author: #$author (@{$TG->data['message']['from']['username']})",
+			'link_preview_options' => [
+				'url' => $url,
+				'prefer_small_media' => true,
+			],
 		]);
 } else {
 	$TG->sendMsg([
