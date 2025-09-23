@@ -10,7 +10,7 @@ class MyDB {
 	/* Return code (string) or false (bool) */
 	public function findCodeByUrl(string $url) {
 		/* Find existed one */
-		$sql = "SELECT * FROM main WHERE url = :url";
+		$sql = "SELECT * FROM main WHERE url = :url AND deleted_at IS NULL";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':url' => $url
@@ -25,7 +25,7 @@ class MyDB {
 
 	/* Return data or false */
 	public function findByCode(string $code) {
-		$sql = "SELECT * FROM main WHERE code = :code";
+		$sql = "SELECT * FROM main WHERE code = :code AND deleted_at IS NULL";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':code' => $code
@@ -36,7 +36,7 @@ class MyDB {
 
 	/* Return data array, or empty array */
 	public function findByAuthor(string $author) {
-		$sql = "SELECT * FROM main WHERE author = :author";
+		$sql = "SELECT * FROM main WHERE author = :author AND deleted_at IS NULL";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':author' => $author
@@ -47,6 +47,21 @@ class MyDB {
 			$result[] = $data;
 
 		return $result;
+	}
+
+	/* Return an array: [normal, deleted] */
+	public function getUserStatus(string $author) {
+		$sql = "SELECT COUNT(*) FILTER (WHERE deleted_at IS NULL) AS not_deleted_count,
+					   COUNT(*) FILTER (WHERE deleted_at IS NOT NULL) AS deleted_count,
+					   MIN(created_at) as earliest_date,
+					   MAX(created_at) as latest_date
+					FROM main WHERE author = :author";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':author' => $author
+		]);
+
+		return $stmt->fetch();
 	}
 
 	/* Find unused code */
@@ -68,7 +83,7 @@ class MyDB {
 	}
 
 	/* Return error info or ['00000', null, null] on success */
-	public function insert(string $code, string $url, string $author) {
+	public function insertCode(string $code, string $url, string $author) {
 		if (!preg_match('#^[A-Za-z0-9_-]{1,32}$#', $code))
 			return ['SEAN', 0, 'illegal code'];
 
@@ -81,6 +96,56 @@ class MyDB {
 			':code' => $code,
 			':url' => $url,
 			':author' => $author
+		]);
+
+		return $stmt->errorInfo();
+	}
+
+	/* Return banned date or false */
+	public function isUserBanned(string $uid) {
+		$sql = "SELECT * FROM banned_users WHERE uid = :uid";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':uid' => $uid
+		]);
+
+		if ($data = $stmt->fetch())
+			return $data['created_at'];
+
+		return false;
+	}
+
+	public function banUser(string $uid) {
+		$sql = "INSERT OR IGNORE INTO banned_users(uid) VALUES (:uid)";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':uid' => $uid
+		]);
+
+		$sql = "UPDATE main SET deleted_at = CURRENT_TIMESTAMP WHERE author = :uid AND deleted_at IS NULL";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':uid' => $uid
+		]);
+
+		return $stmt->rowCount();
+	}
+
+	public function unbanUser(string $uid) {
+		$sql = "DELETE FROM banned_users WHERE uid = :uid";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':uid' => $uid
+		]);
+
+		return $stmt->rowCount();
+	}
+
+	public function banDomain(string $domain) {
+		$sql = "INSERT INTO banned_domains(domain) VALUES (:domain)";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':domain' => $domain
 		]);
 
 		return $stmt->errorInfo();

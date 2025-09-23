@@ -99,6 +99,81 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 			'disable_web_page_preview' => true
 		]);
 		break;
+
+	case 'b':
+	case 'ban':
+	case 'ban_user':
+		/* Admin only */
+		if (!in_array($TG->FromID, TG_ADMINS)) {
+			$TG->sendMsg([
+				'text' => "Permission denied."
+			]);
+			break;
+		}
+
+		/* Find user ID, args -> replied tag */
+		$uid = $args;
+		if (!preg_match('#^TG\d{8,10}$#', $uid)) {
+			if (preg_match('/#(TG\d{8,10})\D/', $TG->data['message']['reply_to_message']['text'], $matches)) {
+				$uid = $matches[1];
+			} else {
+				$TG->sendMsg([
+					'text' => "Format error."
+				]);
+				break;
+			}
+		}
+
+		/* Check status and ban */
+		$check = $db->isUserBanned($uid);
+		if ($check != false) {
+			$TG->sendMsg([
+				'parse_mode' => 'HTML',
+				'text' => "User #$uid already banned at <code>$check</code>."
+			]);
+			break;
+		}
+
+		$cnt = $db->banUser($uid);
+		$TG->sendMsg([
+			'text' => "Banned #$uid.\nRemoved $cnt links."
+		]);
+		break;
+
+	case 'unban_user':
+		if (!in_array($TG->FromID, TG_ADMINS)) {
+			$TG->sendMsg([
+				'text' => "Permission denied."
+			]);
+			break;
+		}
+		$uid = $args;
+		if (preg_match('#^TG\d{8,10}$#', $uid)) {
+			$check = $db->isUserBanned($uid);
+			if ($check == false) {
+				$TG->sendMsg([
+					'text' => "User #$uid not banned."
+				]);
+				break;
+			}
+
+			$status = $db->getUserStatus($uid);
+			$db->unbanUser($uid);
+
+			$TG->sendMsg([
+				'parse_mode' => 'HTML',
+				'text' => "User #$uid now unbanned.\n" .
+						"Was banned at <code>$check</code>\n\n" .
+						"Link count: {$status['not_deleted_count']} active / {$status['deleted_count']} removed\n" .
+						"First link created at: <code>{$status['earliest_date']}</code>\n" .
+						"Last link created at: <code>{$status['latest_date']}</code>"
+			]);
+			break;
+		}
+		$TG->sendMsg([
+			'text' => "Format error."
+		]);
+		break;
 	case 'start':
 	case 'help':
 	default:
@@ -226,7 +301,7 @@ if (strpos($url, "fbclid=")) {
 }
 /* Both $url and $code should be clean */
 
-if (in_array($TG->FromID, $tg_blacklist)) {
+if ($db->isUserBanned($author)) {
 	$TG->sendMsg([
 		'parse_mode' => 'Markdown',
 		'text' => '*You have been banned.*',
@@ -234,9 +309,30 @@ if (in_array($TG->FromID, $tg_blacklist)) {
 	exit;
 }
 
+if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain)) {
+	$prev_cnt = count($db->findByAuthor($author));
+	$TG->sendMsg([
+		'chat_id' => TG_ADMINS[0],
+		'parse_mode' => 'HTML',
+		'text' => "Warning: blacklisted URL (prev_cnt=$prev_cnt)\n\n" .
+			"URL: $url\n" .
+			"Author: #$author (@{$TG->data['message']['from']['username']})",
+		'link_preview_options' => [
+			'url' => $url,
+			'prefer_small_media' => true,
+		],
+	]);
+	sleep(1);
+	$TG->sendMsg([
+		'parse_mode' => 'Markdown',
+		'text' => 'Creation failed.',
+	]);
+	exit;
+}
+
 
 /* Create Record */
-$error = $db->insert($code, $url, $author);
+$error = $db->insertCode($code, $url, $author);
 
 if ($error[0] === '00000') {
 	$TG->sendMsg([
@@ -261,11 +357,11 @@ if ($error[0] === '00000') {
 
 	$cnt = count($db->findByAuthor($author));  // Prev count + this one
 
-	if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain))
+	if (preg_match('/(' . implode('|', $domain_warnlist) . ')$/i', $domain))
 		$TG->sendMsg([
 			'chat_id' => TG_ADMINS[0],
 			'parse_mode' => 'HTML',
-			'text' => "Warning: blacklisted URL (cnt=$cnt)\n\n" .
+			'text' => "Warning: high-risk URL (cnt=$cnt)\n\n" .
 				"URL: $url\n" .
 				"Code: <code>$code</code>\n" .
 				"Author: #$author (@{$TG->data['message']['from']['username']})",

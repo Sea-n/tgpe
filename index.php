@@ -19,8 +19,8 @@ if (!preg_match('#^/([\w_-]+)(\.([a-z]+))?(/(qr))?$#', $path, $matches1))
 	error(400, 'Link invalid');
 
 $code = $matches1[1];
-$ext = $matches1[3];
-$qr = $matches1[5];
+$ext = $matches1[3] ?? '';
+$qr = $matches1[5] ?? '';
 
 # Retrive $code from database
 $db = new MyDB();

@@ -33,7 +33,7 @@ if (isset($_POST['code'])) {
 		]);
 		exit;
 	}
-} else if ($data = $db->findCodeByUrl($url) && !isset($_POST['force'])) {
+} else if (($data = $db->findCodeByUrl($url)) && !isset($_POST['force'])) {
 	echo json_encode([
 		'ok' => true,
 		'shortLink' => $data,
@@ -45,7 +45,7 @@ if (isset($_POST['code'])) {
 else
 	$code = $db->allocateCode();
 
-$error = $db->insert($code, $url, $author);
+$error = $db->insertCode($code, $url, $author);
 
 if ($error[0] === '00000')
 	echo json_encode([

@@ -9,6 +9,8 @@ if (isset($_POST['url'])) {
 	$url = (string) $_POST['url'];
 	if ($code = $db->findCodeByUrl($url))
 		$error[] = "Already Exists."; // Prevent re-create
+	if (strlen($url) > 1024)
+		$error[] = "URL Too Long.";
 
 
 	$ip_addr = $_SERVER['REMOTE_ADDR'];
@@ -34,16 +36,8 @@ if (isset($_POST['url'])) {
 	if (strpos($url, "fbclid="))
 		$error[] = "Please remove fbclid before sharing URLs.";
 
-	if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
-		$ipb = base64_encode($ip_addr);
-		$ASN = 'AS' . shell_exec("echo '$ipb' | base64 -d | nc whois.cymru.com 43 | tail -n1 | cut -d ' ' -f 1");
-		foreach ($asn_blacklist as $asn => $name)
-			if ("AS{$ASN}" == $asn)
-				$error[] = "Your ISP “$name” ($ASN) is banned by admin. Please use Telegram version instead.";
-	}
-
 	$domain = $matches['domain'] ?? 'url broken';
-	if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain))
+	if (preg_match('/(' . implode('|', $domain_warnlist) . '|' . implode('|', $domain_blacklist) . ')$/i', $domain))
 		$error[] = 'High-risk domain, only allowed in Telegram version.';
 
 	// AbuseIPDB
@@ -67,8 +61,8 @@ if (isset($_POST['url'])) {
 
 
 	if (count($error) === 0) {
-		$code = $db->allocateCode('x', 4);
-		$result = $db->insert($code, $url, $author);
+		$code = $db->allocateCode('', 4);
+		$result = $db->insertCode($code, $url, $author);
 		if ($result[0] !== '00000')
 			$error[] = $result[2];
 	}
@@ -115,7 +109,7 @@ if (isset($_POST['url'])) {
 				<span></span>
 			</span>
 			<br>
-			<span style="color: darkgray;">Custom Short Link: https://tg.pe/<input name="code" size="4" disabled="1" placeholder="x123"><br>
+			<span style="color: darkgray;">Custom Short Link: https://tg.pe/<input name="code" size="4" disabled="1" placeholder="xxxx"><br>
 			<button class="button" type="submit">Shorten!</button>
 			</p>
 		</form>
@@ -146,8 +140,8 @@ function copyLink() {
 <p style='color: red;'>ERROR: <?= $error[0] ?></p>
 <p>Goto <a href='/'>Homepage</a>.</p>
 <?php } ?>
-		<small>Note: Online version only allow random short link starts with <code>x</code>.<br>
-		Use Telegram Bot <a href="https://t.me/tgpebot">@tgpebot</a> to get unlimited access for free.</small>
+		<small>Note: Online version only allow random short link with 4 chars.<br>
+		Use Telegram Bot <a href="https://t.me/tgpebot">@tgpebot</a> to get <code>tg.pe/xxx</code> link for free.</small>
 
 		<p>For abuse report, please send it to <a href="mailto:abuse@tg.pe">abuse@tg.pe</a>, we will proceed within 24 hours.</p>
 	</div>
@@ -156,7 +150,7 @@ function copyLink() {
 <div class="footer">
 	<footer id="footer">
 		<p>Source Code: <a href="https://github.com/Sea-n/tgpe">Sea-n/tgpe</a>
-		| Developed by <a href="https://www.sean.taipei/">Sean</a>.</p>
+		| Developed by <a href="https://sean.cat/about">Sean</a>.</p>
 	</footer>
 </div>
 </center>

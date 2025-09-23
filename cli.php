@@ -14,13 +14,24 @@ case 'build':
 		'url TEXT NOT NULL, ' .
 		'author TEXT NOT NULL, ' .
 		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
-		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
+		'modified_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ' .
+		'deleted_at DATETIME)';
+	$stmt = $db->pdo->prepare($sql);
+	$stmt->execute();
+	$sql = 'CREATE TABLE banned_users (' .
+		'uid TEXT NOT NULL UNIQUE, ' .
+		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
+	$stmt = $db->pdo->prepare($sql);
+	$stmt->execute();
+	$sql = 'CREATE TABLE banned_domains (' .
+		'domain TEXT NOT NULL UNIQUE, ' .
+		'created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)';
 	$stmt = $db->pdo->prepare($sql);
 	$stmt->execute();
 	break;
 
 case 'dump':
-	$sql = "SELECT * FROM main";
+	$sql = "SELECT * FROM main WHERE deleted_at IS NULL";
 	$stmt = $db->pdo->prepare($sql);
 	$stmt->execute();
 	while ($data = $stmt->fetch())
