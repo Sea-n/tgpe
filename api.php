@@ -40,7 +40,9 @@ if (isset($_POST['code'])) {
 		'message' => 'Link already exists.'
 	], JSON_PRETTY_PRINT);
 	exit;
-} else if (isset($_POST['prefix']))
+}
+
+if (isset($_POST['prefix']))
 	$code = $db->allocateCode($_POST['prefix'], $_POST['len'] ?? 3);
 else
 	$code = $db->allocateCode();

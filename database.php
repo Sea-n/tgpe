@@ -3,8 +3,10 @@ class MyDB {
 	public $pdo;
 
 	public function __construct() {
-		$this->pdo = new PDO('sqlite:/usr/share/nginx/tg.pe/sqlite.db');
-		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		require_once('config.php');
+		$this->pdo = new PDO(MYSQL_DSN, MYSQL_USER, MYSQL_PASS, [
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		]);
 	}
 
 	/* Return code (string) or false (bool) */
@@ -51,11 +53,11 @@ class MyDB {
 
 	/* Return an array: [normal, deleted] */
 	public function getUserStatus(string $author) {
-		$sql = "SELECT COUNT(*) FILTER (WHERE deleted_at IS NULL) AS not_deleted_count,
-					   COUNT(*) FILTER (WHERE deleted_at IS NOT NULL) AS deleted_count,
-					   MIN(created_at) as earliest_date,
-					   MAX(created_at) as latest_date
-					FROM main WHERE author = :author";
+		$sql = "SELECT SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) AS not_deleted_count,
+				       SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) AS deleted_count,
+				       MIN(created_at) as earliest_date,
+				       MAX(created_at) as latest_date
+				FROM main WHERE author = :author";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':author' => $author
@@ -116,7 +118,7 @@ class MyDB {
 	}
 
 	public function banUser(string $uid) {
-		$sql = "INSERT OR IGNORE INTO banned_users(uid) VALUES (:uid)";
+		$sql = "INSERT IGNORE INTO banned_users(uid) VALUES (:uid)";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':uid' => $uid
@@ -141,8 +143,52 @@ class MyDB {
 		return $stmt->rowCount();
 	}
 
-	public function banDomain(string $domain) {
-		$sql = "INSERT INTO banned_domains(domain) VALUES (:domain)";
+	public function incrementClickCount(string $code): void {
+		$sql = "UPDATE main SET click_count = click_count + 1 WHERE code = :code";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([':code' => $code]);
+	}
+
+	public function updateLastSafetyCheckAt(string $code): void {
+		$sql = "UPDATE main SET last_safety_check_at = CURRENT_TIMESTAMP(6) WHERE code = :code";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([':code' => $code]);
+	}
+
+	public function deleteBySafetyCheck(string $code): void {
+		$sql = "UPDATE main SET last_safety_check_at = CURRENT_TIMESTAMP(6), deleted_at = CURRENT_TIMESTAMP(6) WHERE code = :code";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([':code' => $code]);
+	}
+
+	public function isDomainBlacklisted(string $domain): bool {
+		$domain = strtolower($domain);
+		$sql = "SELECT 1 FROM domain_blacklist WHERE :domain = domain OR :domain2 LIKE CONCAT('%.', domain) LIMIT 1";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([':domain' => $domain, ':domain2' => $domain]);
+		return (bool) $stmt->fetch();
+	}
+
+	public function isDomainWarnlisted(string $domain): bool {
+		$domain = strtolower($domain);
+		$sql = "SELECT 1 FROM domain_warnlist WHERE :domain = domain OR :domain2 LIKE CONCAT('%.', domain) LIMIT 1";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([':domain' => $domain, ':domain2' => $domain]);
+		return (bool) $stmt->fetch();
+	}
+
+	public function addToBlacklist(string $domain) {
+		$sql = "INSERT INTO domain_blacklist(domain) VALUES (:domain)";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute([
+			':domain' => $domain
+		]);
+
+		return $stmt->errorInfo();
+	}
+
+	public function addToWarnlist(string $domain) {
+		$sql = "INSERT INTO domain_warnlist(domain) VALUES (:domain)";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->execute([
 			':domain' => $domain

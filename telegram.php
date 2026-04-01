@@ -5,6 +5,7 @@ if (!isset($TG))
 
 require_once('/usr/share/nginx/tg.pe/config.php');
 require_once('/usr/share/nginx/tg.pe/database.php');
+require_once('/usr/share/nginx/tg.pe/safety.php');
 $db = new MyDB();
 
 
@@ -309,7 +310,7 @@ if ($db->isUserBanned($author)) {
 	exit;
 }
 
-if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain)) {
+if ($db->isDomainBlacklisted($domain)) {
 	$prev_cnt = count($db->findByAuthor($author));
 	$TG->sendMsg([
 		'chat_id' => TG_ADMINS[0],
@@ -330,6 +331,31 @@ if (preg_match('/(' . implode('|', $domain_blacklist) . ')$/i', $domain)) {
 	exit;
 }
 
+// Google Safe Browsing (fail-open)
+$threatTypes = findSafeBrowsingThreats($url);
+if ($threatTypes === null) {
+	error_log("safe_browsing_fail_open: tg_author={$author}, domain={$domain}, url={$url}");
+} else if (count($threatTypes) > 0) {
+	$reasons = formatSafeBrowsingReasons($threatTypes);
+	$reasonText = implode(', ', $reasons);
+	error_log("safe_browsing_blocked: tg_author={$author}, domain={$domain}, url={$url}, threat_types=" . implode('|', $threatTypes));
+	$TG->sendMsg([
+		'chat_id' => TG_ADMINS[0],
+		'parse_mode' => 'HTML',
+		'text' => "Warning: Google Safe Browsing blocked URL\n\n" .
+			"URL: $url\n" .
+			"Reason: <code>$reasonText</code>\n" .
+			"Author: #$author (@{$TG->data['message']['from']['username']})",
+		'link_preview_options' => [
+			'url' => $url,
+			'prefer_small_media' => true,
+		],
+	]);
+	$TG->sendMsg([
+		'text' => "Creation failed.\n\nBlocked by Google Safe Browsing: {$reasonText}.",
+	]);
+	exit;
+}
 
 /* Create Record */
 $error = $db->insertCode($code, $url, $author);
@@ -357,7 +383,7 @@ if ($error[0] === '00000') {
 
 	$cnt = count($db->findByAuthor($author));  // Prev count + this one
 
-	if (preg_match('/(' . implode('|', $domain_warnlist) . ')$/i', $domain))
+	if ($db->isDomainWarnlisted($domain))
 		$TG->sendMsg([
 			'chat_id' => TG_ADMINS[0],
 			'parse_mode' => 'HTML',

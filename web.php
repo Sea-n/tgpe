@@ -1,12 +1,13 @@
 <?php
 require_once('config.php');
+require_once(__DIR__ . '/safety.php');
 
 if (isset($_POST['url'])) {
 	require_once('database.php');
 	$db = new MyDB();
 	$error = []; // Default no error
 
-	$url = (string) $_POST['url'];
+	$url = trim((string) $_POST['url']);
 	if ($code = $db->findCodeByUrl($url))
 		$error[] = "Already Exists."; // Prevent re-create
 	if (strlen($url) > 1024)
@@ -17,13 +18,15 @@ if (isset($_POST['url'])) {
 	$author = "WEB{$ip_addr}{$_SERVER["HTTP_CF_IPCOUNTRY"]}";
 	$data = $db->findByAuthor($author);
 	if ($_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW' && count($data) >= 1) {
-		$error[] = "You can only create 1 links in web version";
+		$last = strtotime(end($data)['created_at']);
+		if (time() - $last <= 60 * 60 + 8 * 60 * 60)
+			$error[] = "You reached 1/hour rate limit in web version";
 	}
 
 	if ($_SERVER["HTTP_CF_IPCOUNTRY"] == 'TW' && count($data) >= 3) {
-		$last = strtotime(end($data)['created_at']);
-		if (time() - $last <= 10 * 60)
-			$error[] = "You can only create 3 links in web version";
+		$last = strtotime(array_slice($data, -3)[0]['created_at']);
+		if (time() - $last <= 3 * 60 + 8 * 60 * 60)
+			$error[] = "You reached 1/min rate limit in web version";
 	}
 
 
@@ -37,8 +40,20 @@ if (isset($_POST['url'])) {
 		$error[] = "Please remove fbclid before sharing URLs.";
 
 	$domain = $matches['domain'] ?? 'url broken';
-	if (preg_match('/(' . implode('|', $domain_warnlist) . '|' . implode('|', $domain_blacklist) . ')$/i', $domain))
+	if ($db->isDomainBlacklisted($domain) || $db->isDomainWarnlisted($domain))
 		$error[] = 'High-risk domain, only allowed in Telegram version.';
+
+	// Google Safe Browsing (only for new links; fail-open)
+	if (count($error) === 0 && empty($code)) {
+		$threatTypes = findSafeBrowsingThreats($url);
+		if ($threatTypes === null) {
+			error_log("safe_browsing_fail_open: ip_addr={$ip_addr}, domain={$domain}, url={$url}");
+		} else if (count($threatTypes) > 0) {
+			$reasons = formatSafeBrowsingReasons($threatTypes);
+			$error[] = 'Blocked by Google Safe Browsing: ' . implode(', ', $reasons) . '.';
+			error_log("safe_browsing_blocked: ip_addr={$ip_addr}, domain={$domain}, url={$url}, threat_types=" . implode('|', $threatTypes));
+		}
+	}
 
 	// AbuseIPDB
 	if (count($error) === 0 && $_SERVER["HTTP_CF_IPCOUNTRY"] != 'TW') {
@@ -143,7 +158,7 @@ function copyLink() {
 		<small>Note: Online version only allow random short link with 4 chars.<br>
 		Use Telegram Bot <a href="https://t.me/tgpebot">@tgpebot</a> to get <code>tg.pe/xxx</code> link for free.</small>
 
-		<p>For abuse report, please send it to <a href="mailto:abuse@tg.pe">abuse@tg.pe</a>, we will proceed within 24 hours.</p>
+		<p>For abuse report, please send it to <a href="mailto:abuse@tg.pe">abuse@tg.pe</a>, we will proceed within 12 hours.</p>
 	</div>
 	<br>
 </div>
