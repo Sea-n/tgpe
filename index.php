@@ -16,12 +16,17 @@ if ($path == '/') { // index homepage
 	exit;
 }
 
-if (!preg_match('#^/([\w_-]+)(\.([a-z]+))?(/(qr))?$#', $path, $matches1))
+if ($path == '/show-demo') { // design playground (noindex)
+	include('show-demo.php');
+	exit;
+}
+
+if (!preg_match('#^/([\w_-]+)(\.([a-z]+))?(/(qr|show))?$#', $path, $matches1))
 	error(400, 'Link invalid');
 
 $code = $matches1[1];
 $ext = $matches1[3] ?? '';
-$qr = $matches1[5] ?? '';
+$action = $matches1[5] ?? '';
 
 # Retrive $code from database
 $db = new MyDB();
@@ -55,7 +60,8 @@ if ($lastCheck === null || strtotime($lastCheck) < time() - 7 * 86400) {
 	// null = timeout or API failure → fail-open, last_safety_check_at unchanged
 }
 
-$db->incrementClickCount($code);
+if ($action !== 'show')
+	$db->incrementClickCount($code);
 
 # For crawlers and /lnk.png pages, skip the HTML page
 if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okhttp|jptt|Mo PTT|curl|Wget)#i", $_SERVER['HTTP_USER_AGENT'] ?? '')
@@ -64,7 +70,12 @@ if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okht
 	exit;
 }
 
-if ($qr == 'qr') {  # For /lnk/qr page
+if ($action == 'show') {
+	include('show.php');
+	exit;
+}
+
+if ($action == 'qr') {  # For /lnk/qr page
 	echo <<<EOF
 <!DOCTYPE html>
 <html>

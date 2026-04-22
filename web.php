@@ -8,8 +8,28 @@ if (isset($_POST['url'])) {
 	$error = []; // Default no error
 
 	$url = trim((string) $_POST['url']);
-	if ($code = $db->findCodeByUrl($url))
-		$error[] = "Already Exists."; // Prevent re-create
+
+	/* Shortcut: if the input is a tg.pe URL (https://tg.pe/xxx, tg.pe/xxx,
+	   with optional /qr or /show suffix) or a bare short code (e.g. "1Az"),
+	   and the code already exists, jump straight to its /show page. */
+	$shortcutCode = null;
+	if (preg_match('#^(?:https?://)?tg\.pe/([a-zA-Z0-9_-]+)(?:/(?:qr|show))?/?$#i', $url, $sm)) {
+		$shortcutCode = $sm[1];
+	} elseif (preg_match('#^[a-zA-Z0-9_-]{1,16}$#', $url)) {
+		$shortcutCode = $url;
+	}
+	if ($shortcutCode !== null) {
+		if ($db->findByCode($shortcutCode)) {
+			header("Location: /$shortcutCode/show");
+			exit;
+		}
+		$error[] = "Short link not found: {$shortcutCode}";
+	}
+
+	if (empty($error) && $code = $db->findCodeByUrl($url)) {
+		header("Location: /$code/show");
+		exit;
+	}
 	if (strlen($url) > 1024)
 		$error[] = "URL Too Long.";
 
@@ -80,6 +100,10 @@ if (isset($_POST['url'])) {
 		$result = $db->insertCode($code, $url, $author);
 		if ($result[0] !== '00000')
 			$error[] = $result[2];
+		else {
+			header("Location: /$code/show");
+			exit;
+		}
 	}
 } ?>
 <!DOCTYPE html>
@@ -87,10 +111,7 @@ if (isset($_POST['url'])) {
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>tg.pe URL Shortener by.Sean</title>
-	<link rel="icon" type="image/png" href="/logo-192.png" sizes="192x192">
-	<link rel="icon" type="image/png" href="/logo-128.png" sizes="128x128">
-	<link rel="icon" type="image/png" href="/logo-64.png" sizes="64x64">
-	<link rel="icon" type="image/png" href="/logo.png" sizes="680x680">
+	<link rel="icon" type="image/png" href="/logo.png">
 	<link rel="stylesheet" href="style.css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="keywords" content="url shortener, tgpe">

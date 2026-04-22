@@ -3,10 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Report Abuse - tg.pe</title>
-	<link rel="icon" type="image/png" href="/logo-192.png" sizes="192x192">
-	<link rel="icon" type="image/png" href="/logo-128.png" sizes="128x128">
-	<link rel="icon" type="image/png" href="/logo-64.png" sizes="64x64">
-	<link rel="icon" type="image/png" href="/logo.png" sizes="680x680">
+	<link rel="icon" type="image/png" href="/logo.png">
 	<link rel="stylesheet" href="style.css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="description" content="Report malicious or abusive short links on tg.pe.">
