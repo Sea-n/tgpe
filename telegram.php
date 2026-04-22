@@ -175,6 +175,56 @@ if (preg_match('#^[/!](?<cmd>\w+)(?:@' . $TG->botName . ')?(?:\s+(?<args>.+))?$#
 			'text' => "Format error."
 		]);
 		break;
+	case 'dban':
+		if (!in_array($TG->FromID, TG_ADMINS)) {
+			$TG->sendMsg(['text' => "Permission denied."]);
+			break;
+		}
+		$domains = preg_split('/[\s,]+/', strtolower($args), -1, PREG_SPLIT_NO_EMPTY);
+		if (empty($domains)) {
+			$TG->sendMsg(['text' => "Format error.\nUsage: /dban <domain> [domain2 ...]"]);
+			break;
+		}
+		$added = []; $skipped = []; $invalid = [];
+		foreach ($domains as $d) {
+			if (!preg_match('/^[a-z0-9.-]+\.[a-z]{2,}$/', $d)) {
+				$invalid[] = $d;
+				continue;
+			}
+			$db->addToBlacklist($d)[0] === '00000' ? $added[] = $d : $skipped[] = $d;
+		}
+		$lines = [];
+		if ($added)   $lines[] = "Blacklisted: " . implode(', ', $added);
+		if ($skipped) $lines[] = "Already exists: " . implode(', ', $skipped);
+		if ($invalid) $lines[] = "Invalid: " . implode(', ', $invalid);
+		$TG->sendMsg(['text' => implode("\n", $lines)]);
+		break;
+
+	case 'dwarn':
+		if (!in_array($TG->FromID, TG_ADMINS)) {
+			$TG->sendMsg(['text' => "Permission denied."]);
+			break;
+		}
+		$domains = preg_split('/[\s,]+/', strtolower($args), -1, PREG_SPLIT_NO_EMPTY);
+		if (empty($domains)) {
+			$TG->sendMsg(['text' => "Format error.\nUsage: /dwarn <domain> [domain2 ...]"]);
+			break;
+		}
+		$added = []; $skipped = []; $invalid = [];
+		foreach ($domains as $d) {
+			if (!preg_match('/^[a-z0-9.-]+$/', $d)) {
+				$invalid[] = $d;
+				continue;
+			}
+			$db->addToWarnlist($d)[0] === '00000' ? $added[] = $d : $skipped[] = $d;
+		}
+		$lines = [];
+		if ($added)   $lines[] = "Added to warnlist: " . implode(', ', $added);
+		if ($skipped) $lines[] = "Already exists: " . implode(', ', $skipped);
+		if ($invalid) $lines[] = "Invalid: " . implode(', ', $invalid);
+		$TG->sendMsg(['text' => implode("\n", $lines)]);
+		break;
+
 	case 'start':
 	case 'help':
 	default:

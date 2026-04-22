@@ -31,7 +31,7 @@ case 'build':
 	break;
 
 case 'dump':
-	$sql = "SELECT * FROM main WHERE deleted_at IS NULL";
+	$sql = "SELECT * FROM main WHERE deleted_at IS NULL ORDER BY created_at ASC";
 	$stmt = $db->pdo->prepare($sql);
 	$stmt->execute();
 	while ($data = $stmt->fetch())
