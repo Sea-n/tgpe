@@ -97,6 +97,17 @@ body {
 }
 body.sidebar-collapsed #sidebar { width: 0; border-right-width: 0; }
 
+/* Peek: mouse hovering the left edge while collapsed re-expands the sidebar
+   without changing the persistent collapsed state. Width transition reuses
+   the same rule. */
+body.sidebar-collapsed.sidebar-peek #sidebar { width: 280px; border-right-width: 1px; }
+body.sidebar-collapsed.sidebar-peek #expand-btn { display: none; }
+/* While peeked, the in-sidebar button shows the expand (hamburger) icon — clicking
+   it converts the temporary peek into a permanent open state. */
+#collapse-btn .icon-expand { display: none; }
+body.sidebar-peek #collapse-btn .icon-collapse { display: none; }
+body.sidebar-peek #collapse-btn .icon-expand { display: inline-flex; }
+
 /* Header now only holds the collapse button (logo lives in #top-logo overlay).
    40px height keeps spacing parity with the floating logo at top: 16px. */
 .sidebar-header {
@@ -146,7 +157,8 @@ body.sidebar-collapsed #sidebar { width: 0; border-right-width: 0; }
 	transition: transform .25s var(--ease), background-color var(--theme-dur) ease;
 	z-index: -1;
 }
-.seg-slide[data-mode="big"]::before { transform: translateX(100%); }
+.seg-slide[data-mode="big"]::before,
+.seg-slide[data-style="classic"]::before { transform: translateX(100%); }
 .seg-slide button {
 	font: inherit;
 	font-size: 13.5px;
@@ -164,6 +176,32 @@ body.sidebar-collapsed #sidebar { width: 0; border-right-width: 0; }
 }
 .seg-slide button svg { width: 16px; height: 16px; stroke-width: 2; }
 .seg-slide button.active { color: var(--accent-btn-text); font-weight: 600; }
+
+/* ---------- Sidebar action button (Download etc.) ----------
+   Ghost-style, content-width — secondary action, kept low-key so users won't
+   accidentally tap it while the QR/title/copy controls are the main focus. */
+.btn-row { display: flex; gap: 6px; }
+.sidebar-btn {
+	font: inherit;
+	font-size: 13.5px;
+	padding: 5px 12px;
+	border: 1px solid var(--input-border);
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: 6px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-weight: 500;
+	transition:
+		background-color var(--theme-dur) ease,
+		color var(--theme-dur) ease,
+		border-color var(--theme-dur) ease;
+}
+.sidebar-btn:hover { border-color: var(--accent); color: var(--accent); }
+.sidebar-btn svg { width: 14px; height: 14px; stroke-width: 2; }
 
 /* ---------- Labels / inputs / link rows ---------- */
 .label {
@@ -316,7 +354,7 @@ main, main * { cursor: pointer; }
 
 .title-slot {
 	font-family: var(--sans);
-	font-size: clamp(22px, 4vh, 40px);
+	font-size: max(22px, 4vh);
 	font-weight: 600;
 	color: var(--title-color);
 	line-height: 1.2;
@@ -343,18 +381,18 @@ main, main * { cursor: pointer; }
 		margin-bottom var(--dur) var(--ease);
 }
 .qr-box > div { width: 100%; height: 100%; }
-.qr-box canvas, .qr-box img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; }
+.qr-box canvas, .qr-box img, .qr-box svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; display: block; }
 
 #stage.mode-qr .qr-box {
-	width: min(68vh, 72vw, 520px);
-	height: min(68vh, 72vw, 520px);
+	width: min(55vh, 72vw);
+	height: min(55vh, 72vw);
 	padding: 16px;
 	border-radius: 12px;
 	box-shadow: 0 2px 12px var(--shadow);
 }
 #stage.mode-big .qr-box {
-	width: min(38vh, 40vw, 320px);
-	height: min(38vh, 40vw, 320px);
+	width: min(38vh, 40vw);
+	height: min(38vh, 40vw);
 	padding: 10px;
 	border-radius: 10px;
 	box-shadow: 0 2px 10px var(--shadow);
@@ -391,7 +429,7 @@ main, main * { cursor: pointer; }
 	transition: transform var(--dur) var(--ease), color var(--theme-dur) ease;
 }
 #stage.mode-qr #body-wrap {
-	transform: scale(calc(clamp(28px, 5.5vh, 56px) / 100px));
+	transform: scale(calc(max(28px, 8vh) / 100px));
 	letter-spacing: 1px;
 	transition:
 		transform var(--dur) var(--ease),
@@ -406,17 +444,10 @@ main, main * { cursor: pointer; }
 	font-size: 0.5em;
 	letter-spacing: normal;
 	display: inline-block;
-	overflow: hidden;
 	vertical-align: baseline;
-	max-width: 12ch;
-	opacity: 1;
-	/* Same duration as max-width so scheme fades in sync with mode change */
-	transition:
-		max-width var(--dur) var(--ease),
-		opacity var(--dur) var(--ease),
-		color var(--theme-dur) ease;
+	transition: color var(--theme-dur) ease;
 }
-#stage.hide-scheme .scheme-prefix { max-width: 0; opacity: 0; }
+#stage.hide-scheme .scheme-prefix { display: none; }
 
 /* ---------- Top-left logo (always visible — the sidebar's interior no longer
    carries its own logo, so this single fixed-position element looks the same
@@ -454,20 +485,14 @@ main, main * { cursor: pointer; }
 :fullscreen { background: var(--bg); }
 :-webkit-full-screen { background: var(--bg); }
 
-:fullscreen #sidebar,
-:fullscreen #expand-btn,
 :fullscreen #theme-btn,
 :fullscreen #mobile-bar,
 :fullscreen .fs-hint { display: none !important; }
 
-:-webkit-full-screen #sidebar,
-:-webkit-full-screen #expand-btn,
 :-webkit-full-screen #theme-btn,
 :-webkit-full-screen #mobile-bar,
 :-webkit-full-screen .fs-hint { display: none !important; }
 
-body.is-fullscreen #sidebar,
-body.is-fullscreen #expand-btn,
 body.is-fullscreen #theme-btn,
 body.is-fullscreen #mobile-bar,
 body.is-fullscreen .fs-hint { display: none !important; }
@@ -554,30 +579,36 @@ body.is-fullscreen .fs-hint { display: none !important; }
 	<div id="sidebar-inner">
 		<div class="sidebar-header">
 			<button class="icon-btn" id="collapse-btn" aria-label="Collapse sidebar" title="Collapse">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+				<svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="15 18 9 12 15 6"></polyline>
+				</svg>
+				<svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="9 18 15 12 9 6"></polyline>
 				</svg>
 			</button>
 		</div>
 
-		<div class="seg-slide" id="mode-seg" data-mode="qr" role="tablist">
-			<button class="mode-btn active" data-mode="qr" aria-label="QR code mode">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-					<rect x="3" y="3" width="7" height="7" rx="1"></rect>
-					<rect x="14" y="3" width="7" height="7" rx="1"></rect>
-					<rect x="3" y="14" width="7" height="7" rx="1"></rect>
-					<path d="M14 14h3v3M20 14v3M14 20h3M20 20v0.01"></path>
-				</svg>
-				QR code
-			</button>
-			<button class="mode-btn" data-mode="big" aria-label="Big Text mode">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-					<polyline points="4 7 4 4 20 4 20 7"></polyline>
-					<line x1="9" y1="20" x2="15" y2="20"></line>
-					<line x1="12" y1="4" x2="12" y2="20"></line>
-				</svg>
-				Big Text
-			</button>
+		<div>
+			<div class="label">Mode</div>
+			<div class="seg-slide" id="mode-seg" data-mode="qr" role="tablist">
+				<button class="mode-btn active" data-mode="qr" aria-label="QR code mode">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="3" width="7" height="7" rx="1"></rect>
+						<rect x="14" y="3" width="7" height="7" rx="1"></rect>
+						<rect x="3" y="14" width="7" height="7" rx="1"></rect>
+						<path d="M14 14h3v3M20 14v3M14 20h3M20 20v0.01"></path>
+					</svg>
+					QR code
+				</button>
+				<button class="mode-btn" data-mode="big" aria-label="Big Text mode">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 7 4 4 20 4 20 7"></polyline>
+						<line x1="9" y1="20" x2="15" y2="20"></line>
+						<line x1="12" y1="4" x2="12" y2="20"></line>
+					</svg>
+					Big Text
+				</button>
+			</div>
 		</div>
 
 		<div>
@@ -597,6 +628,29 @@ body.is-fullscreen .fs-hint { display: none !important; }
 			<div class="label">Title</div>
 			<div class="input-row">
 				<input type="text" id="title-input" placeholder="Add a title for your audience…" autocomplete="off">
+			</div>
+		</div>
+
+		<div>
+			<div class="label">Style</div>
+			<div class="seg-slide" id="style-seg" data-style="modern" role="tablist">
+				<button class="style-btn active" data-style="modern">Modern</button>
+				<button class="style-btn" data-style="classic">Classic</button>
+			</div>
+		</div>
+
+		<div>
+			<div class="label">Download</div>
+			<div class="btn-row">
+				<button id="download-png-btn" class="sidebar-btn" type="button">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+						<polyline points="7 10 12 15 17 10"></polyline>
+						<line x1="12" y1="15" x2="12" y2="3"></line>
+					</svg>
+					PNG
+				</button>
+				<button id="download-svg-btn" class="sidebar-btn" type="button">SVG</button>
 			</div>
 		</div>
 
@@ -662,12 +716,147 @@ body.is-fullscreen .fs-hint { display: none !important; }
 	var hideScheme = false;
 	var rafId = null;
 
-	new QRCode(document.getElementById('qr-inner'), {
-		text: FULL_URL, width: 1024, height: 1024, correctLevel: QRCode.CorrectLevel.M
-	});
-	// QRCode lib auto-sets title=URL on its container — drop it so the browser
-	// doesn't show a distracting tooltip on hover (the user's Title stays visible).
-	document.getElementById('qr-inner').removeAttribute('title');
+	// QR style state — restored from localStorage if present
+	var qrStyle = 'modern';
+	try {
+		var savedStyle = localStorage.getItem('qr-style');
+		if (savedStyle === 'modern' || savedStyle === 'classic') qrStyle = savedStyle;
+	} catch (e) {}
+
+	var qrInner = document.getElementById('qr-inner');
+
+	// Compute the QR matrix once (using davidshimjs) — used by both renderers.
+	function computeMatrix(text) {
+		var tmp = document.createElement('div');
+		var qr = new QRCode(tmp, {
+			text: text, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M
+		});
+		var src = qr._oQRCode;
+		var n = src.getModuleCount();
+		var matrix = [];
+		for (var r = 0; r < n; r++) {
+			var row = [];
+			for (var c = 0; c < n; c++) row.push(src.isDark(r, c));
+			matrix.push(row);
+		}
+		return { matrix: matrix, n: n };
+	}
+	var QR_MATRIX = computeMatrix(FULL_URL);
+	var QR_FILL   = '#000';
+
+	function isFinder(r, c, n) {
+		return (r < 7 && c < 7)         ||  // top-left
+		       (r < 7 && c >= n - 7)    ||  // top-right
+		       (r >= n - 7 && c < 7);       // bottom-left
+	}
+
+	// `quiet` adds a white quiet-zone border (in modules) — used for PNG export
+	// to keep the code reliably scannable when printed / shared.
+	function buildSVG(style, quiet) {
+		quiet = quiet || 0;
+		var n = QR_MATRIX.n;
+		var m = QR_MATRIX.matrix;
+		var total = n + quiet * 2;
+		// Classic uses crispEdges to prevent anti-aliasing seams between adjacent
+		// dark modules when rasterised; Modern needs default smoothing for the
+		// rounded finder patterns and diamond polygons.
+		var rendering = style === 'classic' ? ' shape-rendering="crispEdges"' : '';
+		var s = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + (-quiet) + ' ' + (-quiet) + ' ' + total + ' ' + total + '" preserveAspectRatio="xMidYMid meet"' + rendering + '>'];
+		s.push('<rect x="' + (-quiet) + '" y="' + (-quiet) + '" width="' + total + '" height="' + total + '" fill="#fff"/>');
+
+		if (style === 'modern') {
+			for (var r = 0; r < n; r++) {
+				for (var c = 0; c < n; c++) {
+					if (!m[r][c] || isFinder(r, c, n)) continue;
+					var cx = c + 0.5, cy = r + 0.5, half = 0.42;
+					s.push('<polygon points="' + cx + ',' + (cy - half) + ' ' + (cx + half) + ',' + cy + ' ' + cx + ',' + (cy + half) + ' ' + (cx - half) + ',' + cy + '" fill="' + QR_FILL + '"/>');
+				}
+			}
+			// 3 finder patterns: outer ring (filled→white→filled center)
+			var finders = [[0, 0], [0, n - 7], [n - 7, 0]];
+			finders.forEach(function (p) {
+				var fr = p[0], fc = p[1];
+				s.push('<rect x="' + fc + '" y="' + fr + '" width="7" height="7" rx="1.8" ry="1.8" fill="' + QR_FILL + '"/>');
+				s.push('<rect x="' + (fc + 1) + '" y="' + (fr + 1) + '" width="5" height="5" rx="1.3" ry="1.3" fill="#fff"/>');
+				s.push('<rect x="' + (fc + 2) + '" y="' + (fr + 2) + '" width="3" height="3" rx="0.8" ry="0.8" fill="' + QR_FILL + '"/>');
+			});
+		} else {
+			for (var r = 0; r < n; r++) {
+				for (var c = 0; c < n; c++) {
+					if (!m[r][c]) continue;
+					s.push('<rect x="' + c + '" y="' + r + '" width="1" height="1" fill="' + QR_FILL + '"/>');
+				}
+			}
+		}
+
+		s.push('</svg>');
+		return s.join('');
+	}
+
+	function renderQR() {
+		qrInner.innerHTML = buildSVG(qrStyle, 0);
+		qrInner.removeAttribute('title');
+	}
+	renderQR();
+
+	function triggerDownload(blob, ext) {
+		var a = document.createElement('a');
+		a.href = URL.createObjectURL(blob);
+		a.download = 'tgpe-' + CODE + '-' + qrStyle + '.' + ext;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(a.href);
+	}
+
+	// Save as PNG. Canvas size is snapped to an integer multiple of the module
+	// grid so each module lands on exact pixel boundaries.
+	function downloadPNG() {
+		var quiet = 2;
+		var n = QR_MATRIX.n;
+		var total = n + quiet * 2;
+		var ms = Math.floor(1160 / total);   // pixels per module (integer)
+		var size = ms * total;
+		var canvas = document.createElement('canvas');
+		canvas.width = size;
+		canvas.height = size;
+		var ctx = canvas.getContext('2d');
+		ctx.fillStyle = '#fff';
+		ctx.fillRect(0, 0, size, size);
+
+		if (qrStyle === 'classic') {
+			// Draw modules directly with fillRect — each cell aligns to integer
+			// pixels with no AA, so adjacent dark cells merge cleanly.
+			var m = QR_MATRIX.matrix;
+			ctx.fillStyle = QR_FILL;
+			for (var r = 0; r < n; r++) {
+				for (var c = 0; c < n; c++) {
+					if (!m[r][c]) continue;
+					ctx.fillRect((c + quiet) * ms, (r + quiet) * ms, ms, ms);
+				}
+			}
+			canvas.toBlob(function (b) { triggerDownload(b, 'png'); }, 'image/png');
+			return;
+		}
+
+		// Modern: rasterise SVG (rounded finder patterns + diamonds need vector AA).
+		var svg = buildSVG(qrStyle, quiet);
+		var blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+		var url = URL.createObjectURL(blob);
+		var img = new Image();
+		img.onload = function () {
+			ctx.drawImage(img, 0, 0, size, size);
+			URL.revokeObjectURL(url);
+			canvas.toBlob(function (b) { triggerDownload(b, 'png'); }, 'image/png');
+		};
+		img.onerror = function () { URL.revokeObjectURL(url); };
+		img.src = url;
+	}
+
+	function downloadSVG() {
+		var svg = buildSVG(qrStyle, 2);
+		triggerDownload(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'svg');
+	}
 
 	var stageEl       = document.getElementById('stage');
 	var textBox       = document.querySelector('.text-box');
@@ -697,14 +886,12 @@ body.is-fullscreen .fs-hint { display: none !important; }
 	function runAnim(duration) {
 		if (rafId) cancelAnimationFrame(rafId);
 		if (mode !== 'big') return;
-		bodyWrap.style.transition = 'none';
 		var start = performance.now();
 		function loop() {
 			applyScale();
 			if (performance.now() - start < duration) {
 				rafId = requestAnimationFrame(loop);
 			} else {
-				bodyWrap.style.transition = '';
 				rafId = null;
 			}
 		}
@@ -712,19 +899,16 @@ body.is-fullscreen .fs-hint { display: none !important; }
 	}
 	function stopAnim() {
 		if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-		bodyWrap.style.transition = '';
 	}
 
 	// --------- Mode switch ---------
-	// For qr→big: class toggle alone would briefly let the base `transform: scale(1)`
-	// take effect between paint and the first rAF, causing a two-stage animation.
-	// We disable the transform transition, toggle classes, and set the target scale
-	// synchronously so the first paint lands on the right value. The rAF then tracks
-	// the container-size transition without CSS transition fighting.
+	// CSS transition on bodyWrap.transform is left enabled, so each rAF-set scale
+	// is animated towards from the previous visual state — qr→big becomes a smooth
+	// growth from QR-mode caption scale to Big Text fit scale. Synchronous applyScale
+	// provides an early target so the transition doesn't briefly aim at base scale(1).
 	function setMode(next) {
 		if (mode === next) return;
 
-		if (next === 'big') bodyWrap.style.transition = 'none';
 		mode = next;
 		stageEl.classList.toggle('mode-qr',  next === 'qr');
 		stageEl.classList.toggle('mode-big', next === 'big');
@@ -736,27 +920,77 @@ body.is-fullscreen .fs-hint { display: none !important; }
 		stageEl.classList.toggle('hide-scheme', hideScheme);
 
 		if (next === 'big') {
-			applyScale();     // snap to target scale synchronously (no brief scale(1))
-			runAnim(440);     // continue tracking while qr-box / text-box finish transitioning
+			applyScale();
+			runAnim(440);
 		} else {
-			stopAnim();       // clears inline transition so stylesheet transition takes over
-			bodyWrap.style.transform = '';   // let mode-qr CSS rule animate down to caption size
+			stopAnim();
+			bodyWrap.style.transform = '';
 		}
 	}
 	document.querySelectorAll('.mode-btn').forEach(function (b) {
 		b.addEventListener('click', function (e) { e.stopPropagation(); setMode(b.dataset.mode); });
 	});
 
+	// --------- QR style toggle (Modern <-> Classic) ---------
+	var styleSeg = document.getElementById('style-seg');
+	function setStyle(next) {
+		if (qrStyle === next) return;
+		qrStyle = next;
+		styleSeg.dataset.style = next;
+		document.querySelectorAll('.style-btn').forEach(function (b) {
+			b.classList.toggle('active', b.dataset.style === next);
+		});
+		try { localStorage.setItem('qr-style', next); } catch (e) {}
+		renderQR();
+	}
+	// Sync UI to restored qrStyle on load
+	styleSeg.dataset.style = qrStyle;
+	document.querySelectorAll('.style-btn').forEach(function (b) {
+		b.classList.toggle('active', b.dataset.style === qrStyle);
+	});
+	document.querySelectorAll('.style-btn').forEach(function (b) {
+		b.addEventListener('click', function (e) { e.stopPropagation(); setStyle(b.dataset.style); });
+	});
+
+	document.getElementById('download-png-btn').addEventListener('click', function (e) {
+		e.stopPropagation();
+		downloadPNG();
+	});
+	document.getElementById('download-svg-btn').addEventListener('click', function (e) {
+		e.stopPropagation();
+		downloadSVG();
+	});
+
 	// --------- Sidebar collapse/expand ---------
 	function setCollapsed(v) {
 		document.body.classList.toggle('sidebar-collapsed', v);
+		document.body.classList.remove('sidebar-peek');
 		if (mode === 'big') runAnim(440);
 	}
 	document.getElementById('collapse-btn').addEventListener('click', function (e) {
-		e.stopPropagation(); setCollapsed(true);
+		e.stopPropagation();
+		// Peek state: clicking converts temporary peek into permanent open.
+		if (document.body.classList.contains('sidebar-peek')) setCollapsed(false);
+		else setCollapsed(true);
 	});
 	document.getElementById('expand-btn').addEventListener('click', function (e) {
 		e.stopPropagation(); setCollapsed(false);
+	});
+
+	// --------- Sidebar peek (mouse near left edge re-opens collapsed sidebar) ---------
+	var PEEK_TRIGGER_X = 32;
+	var PEEK_DISMISS_X = 280 + 60;   // sidebar width + buffer
+	document.addEventListener('mousemove', function (e) {
+		if (!document.body.classList.contains('sidebar-collapsed')) return;
+		var x = e.clientX;
+		var peeking = document.body.classList.contains('sidebar-peek');
+		if (!peeking && x < PEEK_TRIGGER_X) {
+			document.body.classList.add('sidebar-peek');
+			if (mode === 'big') runAnim(440);
+		} else if (peeking && x > PEEK_DISMISS_X) {
+			document.body.classList.remove('sidebar-peek');
+			if (mode === 'big') runAnim(440);
+		}
 	});
 
 	// --------- Fullscreen ---------
