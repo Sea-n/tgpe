@@ -302,14 +302,8 @@ if (strlen($code) > 16) { /* Check Code Length */
 				'inline_keyboard' => [
 					[
 						[
-							'text' => 'Screen Message',
-							'url' => "https://www.sean.taipei/sm#t=tg.pe%2F$code"
-						]
-					],
-					[
-						[
 							'text' => 'QR code',
-							'url' => "https://tg.pe/$code/qr"
+							'url' => "https://tg.pe/$code/show"
 						]
 					]
 				]
@@ -417,14 +411,8 @@ if ($error[0] === '00000') {
 			'inline_keyboard' => [
 				[
 					[
-						'text' => 'Screen Message',
-						'url' => "https://www.sean.taipei/sm#t=tg.pe%2F$code"
-					]
-				],
-				[
-					[
 						'text' => 'QR code',
-						'url' => "https://tg.pe/$code/qr"
+						'url' => "https://tg.pe/$code/show"
 					]
 				]
 			]

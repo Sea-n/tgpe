@@ -28,6 +28,13 @@ $code = $matches1[1];
 $ext = $matches1[3] ?? '';
 $action = $matches1[5] ?? '';
 
+/* /xxx/qr is the legacy QR-only page; redirect to /xxx/show which now
+   contains a richer QR + URL display. */
+if ($action === 'qr') {
+	header("Location: /$code/show", true, 301);
+	exit;
+}
+
 # Retrive $code from database
 $db = new MyDB();
 
@@ -73,35 +80,6 @@ if (preg_match("#(TelegramBot|TwitterBot|PlurkBot|facebookexternalhit|ZXing|okht
 if ($action == 'show') {
 	include('show.php');
 	exit;
-}
-
-if ($action == 'qr') {  # For /lnk/qr page
-	echo <<<EOF
-<!DOCTYPE html>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="robots" content="noindex,nosnippet">
-	<style>
-		body {
-			background-color: #f8f8f8;
-		}
-		img.qr {
-			display: block;
-			width: auto;
-			height: auto;
-			max-width: 98vw;
-			max-height: 98vh;
-			margin: auto;
-		}
-	</style>
-</head>
-<body>
-	<img class="qr" src="https://quickchart.io/qr?text=https://tg.pe/$code&size=1200&captionFontSize=72&ecLevel=L&caption=https://tg.pe/$code&captionFontFamily=Courier+New">
-</body>
-</html>
-EOF;
-	exit();
 }
 
 ?>
